@@ -1,8 +1,11 @@
 package com.bdumeljic.comicbook;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +14,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.StackView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +43,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     /**
      * The fragment's ListView/GridView.
      */
-    private AbsListView mListView;
+    private AbsListView mGridView;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
@@ -82,11 +86,11 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
         View view = inflater.inflate(R.layout.fragment_project, container, false);
 
         // Set the adapter
-        mListView = (GridView) view.findViewById(R.id.projects);
-        mListView.setAdapter(mAdapter);
+        mGridView = (GridView) view.findViewById(R.id.projects);
+        mGridView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
-        //mListView.setOnItemClickListener(this);
+        mGridView.setOnItemClickListener(this);
 
         return view;
     }
@@ -111,11 +115,41 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d("PROJECT", "project clicked " + mAdapter.getItem(position).toString());
+
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(mProjects.get(position).toString());
+
+            mListener.onFragmentInteraction(mProjects.get(position));
         }
+
+
+        /*View parentview = getActivity().getLayoutInflater().inflate(R.layout.fragment_project, parent, false);
+
+        GridView projects = (GridView) parentview.findViewById(R.id.projects);
+        ListView vols = (ListView) parentview.findViewById(R.id.volumes);
+        vols.setVisibility(View.VISIBLE);
+
+        //LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+        //p.weight = 1.0f;
+        //projects.setLayoutParams(p);
+        //vols.setLayoutParams(p);
+
+
+        ArrayList<String> mVolNames = new ArrayList<String>();
+
+        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) ((ProjectModel.Project) mAdapter.getItem(position)).getVolumes()) {
+            if (vol.getVolName() != null) {
+                mVolNames.add(vol.getVolName());
+            }
+        }
+
+        ArrayAdapter mVolsAdapter = new ArrayAdapter<VolumeModel.Volume>(getActivity(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, (ArrayList) mVolNames);
+
+        vols.setAdapter(mVolsAdapter);
+        vols.setOnItemClickListener(mOnVolClickListener);*/
     }
 
     /**
@@ -124,7 +158,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
      * to supply the text it should use.
      */
     public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
+        View emptyView = mGridView.getEmptyView();
 
         if (emptyText instanceof TextView) {
             ((TextView) emptyView).setText(emptyText);
@@ -143,7 +177,9 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(ProjectModel.Project p);
+
+        Dialog onCreateDialog(Bundle savedInstanceState);
     }
 
     protected class ProjectsAdapter extends BaseAdapter {
@@ -176,21 +212,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_project, parent, false);
             }
 
-            final StackView vols = (StackView) convertView.findViewById(R.id.volumes);
-
-            ArrayList<String> mVolNames = new ArrayList<String>();
-
-            for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) getItem(row).getVolumes()) {
-                if(vol.getVolName() != null) {
-                    mVolNames.add(vol.getVolName());
-                }
-            }
-
-            ArrayAdapter mVolsAdapter = new ArrayAdapter<VolumeModel.Volume>(getActivity(), R.layout.project_item, R.id.volName, (ArrayList) mVolNames);
-            vols.setAdapter(mVolsAdapter);
-            vols.setOnItemClickListener(mCardClickListener);
-
-            TextView mNameText = (TextView) convertView.findViewById(R.id.projectName);
+            TextView mNameText = (TextView) convertView.findViewById(R.id.project_name);
             mNameText.setText(mProjects.get(row).getProjectName());
 
             return convertView;
@@ -198,13 +220,17 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     }
 
     /*
-        TODO: Start editing activity after volume card item is clicked
+        TODO: Start editing activity when a volume item is clicked
      */
-    public OnItemClickListener mCardClickListener = new OnItemClickListener() {
+    public OnItemClickListener mOnVolClickListener = new OnItemClickListener() {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Toast.makeText(getActivity(), "card item clicked", Toast.LENGTH_SHORT).show();
+
+            Intent editIntent = new Intent(getActivity(), EditActivity.class);
+            startActivity(editIntent);
+
         }
     };
 

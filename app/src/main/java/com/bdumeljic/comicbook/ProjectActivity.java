@@ -1,19 +1,28 @@
 package com.bdumeljic.comicbook;
 
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 
+import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.VolumeModel;
+
+import java.util.ArrayList;
 
 
 public class ProjectActivity extends Activity implements ProjectFragment.OnFragmentInteractionListener {
+
+    public final static String PROJECT = "param_project";
+    public final static String VOLUME = "param_volume";
+
+    private ArrayList<String> mVolNames;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +56,43 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
     }
 
     @Override
-    public void onFragmentInteraction(String id) {
+    public void onFragmentInteraction(final ProjectModel.Project p) {
+        mVolNames = new ArrayList<String>();
 
+        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) p.getVolumes()) {
+            if (vol.getVolName() != null) {
+                mVolNames.add(vol.getVolName());
+            }
+        }
+
+        ListAdapter mAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, mVolNames);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_volumes)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // here you can add functions
+                        dialog.dismiss();
+                    }
+                })
+                .setAdapter(mAdapter, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // The 'which' argument contains the index position
+                        // of the selected item
+
+                        Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
+                        editIntent.putExtra(PROJECT, p.getProjectId());
+                        editIntent.putExtra(VOLUME, which);
+                        startActivity(editIntent);
+                    }
+                })
+                .create();
+
+        alertDialog.show();
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        return null;
     }
 }

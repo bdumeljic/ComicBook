@@ -18,7 +18,28 @@ public class ProjectModel {
         Project p2 = new Project(PROJECTS.size(), "Grayson");
         addProject(p2);
         p2.addVolume(new VolumeModel.Volume(2, "Vol 2"));
-        p.addVolume(new VolumeModel.Volume(3, "Vol 3"));
+        p2.addVolume(new VolumeModel.Volume(3, "Vol 3"));
+
+        Project p3 = new Project(PROJECTS.size(), "Superman");
+        addProject(p3);
+        p3.addVolume(new VolumeModel.Volume(2, "Vol 2"));
+        p3.addVolume(new VolumeModel.Volume(3, "Vol 3"));
+
+        Project p4 = new Project(PROJECTS.size(), "Superman");
+        addProject(p4);
+        p4.addVolume(new VolumeModel.Volume(2, "Vol 2"));
+        p4.addVolume(new VolumeModel.Volume(3, "Vol 3"));
+
+        Project p5 = new Project(PROJECTS.size(), "Superman");
+        addProject(p5);
+        p5.addVolume(new VolumeModel.Volume(2, "Vol 2"));
+        p5.addVolume(new VolumeModel.Volume(3, "Vol 3"));
+
+        Project p6 = new Project(PROJECTS.size(), "Superman");
+        addProject(p6);
+        p6.addVolume(new VolumeModel.Volume(2, "Vol 2"));
+        p6.addVolume(new VolumeModel.Volume(3, "Vol 3"));
+
     }
 
     public static class Project {
@@ -49,7 +70,9 @@ public class ProjectModel {
             return this.mVolumes.get(id);
         }
 
-
+        public int getProjectId() {
+            return this.id;
+        }
     }
 
     private static void addProject(Project project) {

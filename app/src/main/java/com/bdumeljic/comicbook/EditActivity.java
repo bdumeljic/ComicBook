@@ -20,7 +20,7 @@ public class EditActivity extends Activity {
         setContentView(R.layout.activity_edit);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new EditFragment())
                     .commit();
         }
     }
@@ -46,21 +46,5 @@ public class EditActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_edit, container, false);
-            return rootView;
-        }
     }
 }
