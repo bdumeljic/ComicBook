@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.bdumeljic.comicbook.Models.ProjectModel;
 import com.bdumeljic.comicbook.Models.VolumeModel;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static android.widget.AdapterView.OnItemClickListener;
 
@@ -39,6 +41,8 @@ import static android.widget.AdapterView.OnItemClickListener;
 public class ProjectFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     private OnFragmentInteractionListener mListener;
+
+    private Random random = new Random();
 
     /**
      * The fragment's ListView/GridView.
@@ -123,33 +127,6 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
             mListener.onFragmentInteraction(mProjects.get(position));
         }
-
-
-        /*View parentview = getActivity().getLayoutInflater().inflate(R.layout.fragment_project, parent, false);
-
-        GridView projects = (GridView) parentview.findViewById(R.id.projects);
-        ListView vols = (ListView) parentview.findViewById(R.id.volumes);
-        vols.setVisibility(View.VISIBLE);
-
-        //LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
-        //p.weight = 1.0f;
-        //projects.setLayoutParams(p);
-        //vols.setLayoutParams(p);
-
-
-        ArrayList<String> mVolNames = new ArrayList<String>();
-
-        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) ((ProjectModel.Project) mAdapter.getItem(position)).getVolumes()) {
-            if (vol.getVolName() != null) {
-                mVolNames.add(vol.getVolName());
-            }
-        }
-
-        ArrayAdapter mVolsAdapter = new ArrayAdapter<VolumeModel.Volume>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, (ArrayList) mVolNames);
-
-        vols.setAdapter(mVolsAdapter);
-        vols.setOnItemClickListener(mOnVolClickListener);*/
     }
 
     /**
@@ -178,8 +155,6 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(ProjectModel.Project p);
-
-        Dialog onCreateDialog(Bundle savedInstanceState);
     }
 
     protected class ProjectsAdapter extends BaseAdapter {
@@ -212,26 +187,16 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_project, parent, false);
             }
 
+            int[] card_colors = getResources().getIntArray(R.array.project_card_colors);
+            int color = card_colors[random.nextInt(card_colors.length)];
+
+            CardView card = (CardView) convertView.findViewById(R.id.project_card);
+            card.setBackgroundColor(color);
+
             TextView mNameText = (TextView) convertView.findViewById(R.id.project_name);
             mNameText.setText(mProjects.get(row).getProjectName());
 
             return convertView;
         }
     }
-
-    /*
-        TODO: Start editing activity when a volume item is clicked
-     */
-    public OnItemClickListener mOnVolClickListener = new OnItemClickListener() {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Toast.makeText(getActivity(), "card item clicked", Toast.LENGTH_SHORT).show();
-
-            Intent editIntent = new Intent(getActivity(), EditActivity.class);
-            startActivity(editIntent);
-
-        }
-    };
-
 }

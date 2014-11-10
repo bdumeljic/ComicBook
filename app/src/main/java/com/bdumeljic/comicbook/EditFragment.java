@@ -2,13 +2,22 @@ package com.bdumeljic.comicbook;
 
 
 import android.app.Fragment;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
+import java.util.Random;
 
 
 /**
@@ -27,6 +36,11 @@ public class EditFragment extends Fragment {
     private int mVolume;
 
     private View mDecorView;
+
+    private EditSurfaceView mEditSurfaceView;
+    private EditSurfaceView.EditSurfaceThread mEditSurfaceThread;
+
+
 
     /**
      * Start a new EditFragment in which the page layout of a specified volume of a comic book can be edited.
@@ -56,6 +70,8 @@ public class EditFragment extends Fragment {
             mProject = getArguments().getInt(PROJECT, 0);
             mVolume = getArguments().getInt(VOLUME, 0);
         }
+
+
     }
 
     @Override
@@ -88,15 +104,46 @@ public class EditFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
+        mEditSurfaceView = (EditSurfaceView) view.findViewById(R.id.surface);
+        mEditSurfaceThread = mEditSurfaceView.getThread();
+        mEditSurfaceThread.setState(EditSurfaceView.EditSurfaceThread.STATE_READY);
+
+        mEditSurfaceView.refreshDrawableState();
+
         return view;
     }
 
     // This hides the system bars
-    private void hideSystemUI() {
+    public void hideSystemUI() {
         // Hide all the system bars so the user can focus on the drawing
         mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                 | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+        mEditSurfaceView.refreshDrawableState();
     }
+
+
+
+    @Override
+    public void onResume() {
+        // TODO Auto-generated method stub
+        super.onResume();
+        mEditSurfaceView.onResumeMySurfaceView();
+    }
+
+    @Override
+    public void onPause() {
+        // TODO Auto-generated method stub
+        super.onPause();
+        mEditSurfaceView.getThread().pause();
+        mEditSurfaceView.onPauseMySurfaceView();
+
+    }
+
+
+
 }

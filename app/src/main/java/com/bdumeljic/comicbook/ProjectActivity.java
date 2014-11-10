@@ -91,8 +91,4 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
         alertDialog.show();
     }
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return null;
-    }
 }
