@@ -2,6 +2,7 @@
 <resources>
     <color name="primary">#607d8b</color>
     <color name="primary_dark">#455a64</color>
+    <color name="primary_darkest">#263238</color>
     <color name="pink">#e91e63</color>
     <color name="cards">#78909c</color>
     <color name="light_blue">#03a9f4</color>

@@ -67,10 +67,13 @@ public class EditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mProject = getArguments().getInt(PROJECT, 0);
-            mVolume = getArguments().getInt(VOLUME, 0);
+            mProject = getArguments().getInt(PROJECT, -1);
+            mVolume = getArguments().getInt(VOLUME, -1);
         }
 
+        if (mProject < 0 || mVolume < 0) {
+            getActivity().finish();
+        }
 
     }
 

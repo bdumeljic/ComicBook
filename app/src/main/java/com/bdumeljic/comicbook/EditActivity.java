@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -15,6 +16,9 @@ import android.view.ViewGroup;
 import android.os.Build;
 import android.widget.Toast;
 
+import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.VolumeModel;
+
 
 public class EditActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, PagesPresetsFragment.OnFragmentInteractionListener, PagesFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
 
@@ -22,6 +26,9 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+
+    public final static String PROJECT = "param_project";
+    public final static String VOLUME = "param_volume";
 
     public static final int PAGES = 0;
     public static final int PRESETS = 1;
@@ -31,10 +38,26 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
     PagesPresetsFragment presets;
     SettingsFragment settings;
 
+    public int mProjectId = -1;
+    public int mVolId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
+
+        // Get the project and volume IDs that are being edited
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+
+        if (extras != null)
+        {
+            mProjectId = extras.getInt(PROJECT);
+            mVolId = extras.getInt(VOLUME);
+        }
+
+        ProjectModel.Project p = ProjectModel.getProject(mProjectId);
+        getActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getVolName());
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -42,7 +65,7 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new EditFragment())
+                    .add(R.id.container, EditFragment.newInstance(mProjectId, mVolId))
                     .commit();
         }
 
@@ -71,7 +94,6 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
