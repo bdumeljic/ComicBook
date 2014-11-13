@@ -1,23 +1,21 @@
 package com.bdumeljic.comicbook;
 
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.bdumeljic.comicbook.Models.ProjectModel;
-import com.bdumeljic.comicbook.Models.VolumeModel;
 
 
 public class EditActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, PagesPresetsFragment.OnFragmentInteractionListener, PagesFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
@@ -38,8 +36,8 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
     PagesPresetsFragment presets;
     SettingsFragment settings;
 
-    public int mProjectId = -1;
-    public int mVolId = -1;
+    public int mProjectId;
+    public int mVolId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +72,7 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        pages = new PagesFragment();
+        pages = PagesFragment.newInstance(mProjectId, mVolId);
         presets = new PagesPresetsFragment();
         settings = new SettingsFragment();
     }
@@ -112,7 +110,7 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
                 if(pages != null) {
                     fragment = pages;
                 } else {
-                    fragment = new PagesFragment();
+                    fragment = PagesFragment.newInstance(mProjectId, mVolId);
                 }
                 break;
             case PRESETS:

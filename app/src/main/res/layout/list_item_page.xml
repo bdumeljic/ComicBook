@@ -10,11 +10,15 @@
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/page_card"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="150dp"
         android:padding="20dp"
         card_view:cardBackgroundColor="@color/cards"
         android:elevation="3dp"
-        card_view:cardCornerRadius="2dp">
+        card_view:cardCornerRadius="2dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginRight="30dp">
     </android.support.v7.widget.CardView>
 
     <TextView
@@ -24,8 +28,9 @@
         android:textStyle="bold"
         android:layout_margin="4dp"
         android:textColor="@android:color/primary_text_dark"
-        android:id="@+id/num"
-        android:gravity="center_horizontal"/>
+        android:id="@+id/page_num"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>
 

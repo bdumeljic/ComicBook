@@ -2,22 +2,14 @@ package com.bdumeljic.comicbook;
 
 
 import android.app.Fragment;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-
-import java.util.Random;
+import android.widget.Toast;
 
 
 /**
@@ -40,6 +32,7 @@ public class EditFragment extends Fragment {
     private EditSurfaceView mEditSurfaceView;
     private EditSurfaceView.EditSurfaceThread mEditSurfaceThread;
 
+    OnEdgeSwipeTouchListener onSwipeTouchListener;
 
 
     /**
@@ -75,6 +68,7 @@ public class EditFragment extends Fragment {
             getActivity().finish();
         }
 
+
     }
 
     @Override
@@ -95,7 +89,7 @@ public class EditFragment extends Fragment {
                             public void run() {
                                 hideSystemUI();
                             }
-                        }, 5500);
+                        }, 4500);
                     }
                 });
 
@@ -113,6 +107,23 @@ public class EditFragment extends Fragment {
 
         mEditSurfaceView.refreshDrawableState();
 
+        onSwipeTouchListener = new OnEdgeSwipeTouchListener() {
+
+            @Override
+            public void onSwipeLeft() {
+                Log.d("EDGESWIPE", "left");
+                mEditSurfaceView.onClickUndo();
+            }
+
+            @Override
+            public void onSwipeRight() {
+                Log.d("EDGESWIPE", "right");
+                mEditSurfaceView.onClickRedo();
+            }
+        };
+
+        view.setOnTouchListener(onSwipeTouchListener);
+
         return view;
     }
 
@@ -129,12 +140,11 @@ public class EditFragment extends Fragment {
         mEditSurfaceView.refreshDrawableState();
     }
 
-
-
     @Override
     public void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
+        mEditSurfaceView.getThread().unpause();
         mEditSurfaceView.onResumeMySurfaceView();
     }
 

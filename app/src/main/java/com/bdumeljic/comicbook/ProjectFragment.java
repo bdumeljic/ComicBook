@@ -56,7 +56,6 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     private ArrayList<ProjectModel.Project> mProjects;
     private ListAdapter mAdapter;
 
-    // TODO: Rename and change types of parameters
     public static ProjectFragment newInstance(String param1, String param2) {
         ProjectFragment fragment = new ProjectFragment();
         Bundle args = new Bundle();
@@ -75,7 +74,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mProjects = ProjectModel.PROJECTS;
+        mProjects = ProjectModel.getProjects();
 
         // TODO: Change Adapter to display your content
        // mAdapter = new ArrayAdapter<ProjectModel.Project>(getActivity(),

@@ -3,12 +3,21 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
+import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 
+import com.bdumeljic.comicbook.Models.PageModel;
+import com.bdumeljic.comicbook.Models.ProjectModel;
 import com.bdumeljic.comicbook.dummy.DummyContent;
+
+import java.util.ArrayList;
 
 /**
  * A fragment representing a list of Items.
@@ -19,7 +28,24 @@ import com.bdumeljic.comicbook.dummy.DummyContent;
  */
 public class PagesFragment extends ListFragment {
 
+    public final static String PROJECT = "param_project";
+    public final static String VOLUME = "param_volume";
+
+    private int mProject;
+    private int mVolume;
+
     private OnFragmentInteractionListener mListener;
+
+    PagesAdapter mAdapter;
+
+    public static PagesFragment newInstance(int project, int volume) {
+        PagesFragment fragment = new PagesFragment();
+        Bundle args = new Bundle();
+        args.putInt(PROJECT, project);
+        args.putInt(VOLUME, volume);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -32,10 +58,21 @@ public class PagesFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (getArguments() != null) {
+            mProject = getArguments().getInt(PROJECT, -1);
+            mVolume = getArguments().getInt(VOLUME, -1);
+        }
+
+        Log.d("PAGES", "project " + mProject + " vol " + mVolume);
+
+        ArrayList<PageModel.Page> mPages = ProjectModel.getProject(mProject).getVolume(mVolume).getPages();
 
         // TODO: Change Adapter to display your content
-        setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS));
+        //setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
+          //      android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS));
+
+        mAdapter = new PagesAdapter(mPages);
+        setListAdapter(mAdapter);
     }
 
 
@@ -81,6 +118,46 @@ public class PagesFragment extends ListFragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(String id);
+    }
+
+    protected class PagesAdapter extends BaseAdapter {
+
+        private ArrayList<PageModel.Page> mPages;
+
+        public PagesAdapter(ArrayList<PageModel.Page> pages) {
+            super();
+            this.mPages = pages;
+        }
+
+        @Override
+        public int getCount() {
+            return mPages.size();
+        }
+
+        @Override
+        public PageModel.Page getItem(int position) {
+            return mPages.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int row, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_page, parent, false);
+            }
+
+            //CardView card = (CardView) convertView.findViewById(R.id.page_card);
+            //card.setBackgroundColor(color);
+
+            TextView mNumText = (TextView) convertView.findViewById(R.id.page_num);
+            mNumText.setText(String.valueOf(row + 1));
+
+            return convertView;
+        }
     }
 
 }

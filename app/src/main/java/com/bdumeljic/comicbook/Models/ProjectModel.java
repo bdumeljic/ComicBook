@@ -12,7 +12,13 @@ public class ProjectModel {
     static {
         Project p = new Project(PROJECTS.size(), "Superman");
         addProject(p);
-        p.addVolume(new VolumeModel.Volume(2, "Vol 2"));
+        VolumeModel.Volume v = new VolumeModel.Volume(2, "Vol 2");
+        v.addPage();
+        v.addPage();
+        v.addPage();
+        v.addPage();
+
+        p.addVolume(v);
         p.addVolume(new VolumeModel.Volume(3, "Vol 3"));
 
         Project p2 = new Project(PROJECTS.size(), "Grayson");
