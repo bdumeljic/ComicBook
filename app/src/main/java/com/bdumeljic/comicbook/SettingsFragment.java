@@ -7,6 +7,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.ToggleButton;
 
 
 /**
@@ -23,19 +27,53 @@ public class SettingsFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public static final int BLUE = 0;
+    public static final int BLACK = 1;
+    public static final int CLEAR = 2;
+
+
+    public Switch mBlueToggle;
+    public Switch mBlackToggle;
+    public Button mClearButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        mBlueToggle = (Switch) view.findViewById(R.id.toggleButtonBlueInk);
+        mBlackToggle = (Switch) view.findViewById(R.id.toggleButtonBlackInk);
+
+        mBlackToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mListener != null) {
+                    mListener.onFragmentInteraction(BLACK, isChecked);
+                }
+            }
+        });
+
+        mBlueToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mListener != null) {
+                    mListener.onFragmentInteraction(BLUE, mBlueToggle.isChecked());
+                }
+            }
+        });
+
+        mClearButton = (Button) view.findViewById(R.id.clear);
+        mClearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    mListener.onFragmentInteraction(CLEAR, false);
+                }
+            }
+        });
+
+        return view;
     }
 
     @Override
@@ -67,7 +105,7 @@ public class SettingsFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onFragmentInteraction(int type, Boolean bool);
     }
 
 }

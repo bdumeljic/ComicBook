@@ -155,7 +155,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     public final int BLUE = 0;
     public final int BLACK = 1;
 
-    public int drawing_mode = BLACK;
+    public int drawing_mode;
+
+    public boolean visibilityBlue = true;
+    public boolean visibilityBlack = false;
 
     ArrayList<Path> mBluePaths = new ArrayList<Path>();
 
@@ -196,7 +199,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
             }
         });
 
-        setDrawingMode(BLACK);
+        setDrawingMode(BLUE);
+        visibilityBlue = false;
+        visibilityBlack = true;
 
         mBluePaths.clear();
         undonePaths.clear();
@@ -218,6 +223,8 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         mCurrentPath = new Path();
 
         setFocusable(true);
+
+
     }
 
     public void initPaint(Paint p) {
@@ -257,13 +264,15 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         switch (mode) {
             case BLUE:
                 drawing_mode = BLUE;
+                Toast.makeText(getContext(), "Selected Blue Ink", Toast.LENGTH_SHORT).show();
                 break;
             case BLACK:
                 drawing_mode = BLACK;
+                Toast.makeText(getContext(), "Selected Black Ink", Toast.LENGTH_SHORT).show();
                 break;
         }
 
-        Log.d(TAG, "switched to drawging in " + mode);
+        Log.d(TAG, "switched to drawing in " + mode);
         invalidate();
     }
 
@@ -273,6 +282,37 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     public boolean isDrawingModeBlue() {
         return drawing_mode == BLUE;
+
+    }
+
+    public void toggleVisibilityBlue(Boolean visible) {
+        if(!visible) {
+            visibilityBlue = false;
+            Toast.makeText(getContext(), "Turn blue ink OFF", Toast.LENGTH_SHORT).show();
+
+        } else {
+            visibilityBlue = true;
+            Toast.makeText(getContext(), "Keep blue ink ON", Toast.LENGTH_SHORT).show();
+
+        }
+
+        invalidate();
+        Log.d(TAG, "toggle blue to  " + String.valueOf(visibilityBlue));
+    }
+
+    public void toggleVisibilityBlack(Boolean visible) {
+        if(!visible) {
+            visibilityBlack = false;
+            Toast.makeText(getContext(), "Turn black ink OFF", Toast.LENGTH_SHORT).show();
+
+        } else {
+            visibilityBlack = true;
+            Toast.makeText(getContext(), "Keep black ink ON", Toast.LENGTH_SHORT).show();
+
+        }
+
+        invalidate();
+        Log.d(TAG, "toggle black to  " + String.valueOf(visibilityBlack));
     }
 
     //variable for counting two successive up-down events
@@ -418,6 +458,12 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
             for (Path pBlue : mBluePaths) {
                 canvas.drawPath(pBlue, mBluePaint);
             }
+
+            if(visibilityBlack) {
+                for (Panel panel : mPanels) {
+                    canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
+                }
+            }
         }
 
         if (isDrawingModeBlack()) {
@@ -429,8 +475,16 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
                 canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
             }
 
+            canvas.drawPath(mCurrentPath, mBlackPaint);
+
             for (Path pathBlack : mBlackPaths) {
                 canvas.drawPath(pathBlack, mBlackPaint);
+            }
+
+            if(visibilityBlue) {
+                for (Path pBlue : mBluePaths) {
+                    canvas.drawPath(pBlue, mBluePaint);
+                }
             }
         }
     }
@@ -516,6 +570,19 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         return foundPanel;
+    }
+
+    public void clearPage() {
+        mBluePaths.clear();
+        mBlackPaths.clear();
+        mBlackPoints.clear();
+        mPanels.clear();
+
+        undonePaths.clear();
+
+        mCurrentPath = new Path();
+
+        invalidate();
     }
 
     @Override

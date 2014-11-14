@@ -28,6 +28,10 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
     public static final int PRESETS = 1;
     public static final int SETTINGS = 2;
 
+    public static final int BLUE = 0;
+    public static final int BLACK = 1;
+    public static final int CLEAR = 2;
+
     PagesFragment pages;
     PagesPresetsFragment presets;
     SettingsFragment settings;
@@ -136,12 +140,26 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentInteraction(String id) {
 
     }
 
     @Override
-    public void onFragmentInteraction(String id) {
+    public void onFragmentInteraction(int type, Boolean bool) {
+        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
+
+        switch (type) {
+            case BLUE:
+                editFragment.getSurfaceView().toggleVisibilityBlue(bool);
+                break;
+            case BLACK:
+                editFragment.getSurfaceView().toggleVisibilityBlack(bool);
+                break;
+            case CLEAR:
+                editFragment.getSurfaceView().clearPage();
+                break;
+        }
+
 
     }
 }

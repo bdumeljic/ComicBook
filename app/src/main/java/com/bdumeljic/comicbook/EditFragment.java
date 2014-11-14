@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -158,6 +159,10 @@ public class EditFragment extends Fragment {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
         mEditSurfaceView.refreshDrawableState();
+    }
+
+    public EditSurfaceView getSurfaceView() {
+        return mEditSurfaceView;
     }
 
     @Override

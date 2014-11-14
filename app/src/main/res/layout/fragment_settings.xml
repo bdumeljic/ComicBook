@@ -5,10 +5,52 @@
     android:orientation="vertical"
     tools:context="com.bdumeljic.comicbook.SettingsFragment">
 
+
+
     <TextView android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/settings"
+        android:text="@string/visibility"
+        android:textSize="22sp"
         style="@style/settings_body"/>
+
+    <Switch
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Blue"
+        android:id="@+id/toggleButtonBlueInk"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <Switch
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Black"
+        android:id="@+id/toggleButtonBlackInk"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/primary_darkest"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear"
+        android:id="@+id/clear"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/primary_darkest"/>
 
     <TextView android:layout_width="match_parent"
         android:layout_height="wrap_content"
