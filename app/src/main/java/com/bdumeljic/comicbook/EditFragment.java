@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 
 /**
@@ -30,8 +31,10 @@ public class EditFragment extends Fragment {
     private EditSurfaceView mEditSurfaceView;
     private EditSurfaceView.EditSurfaceThread mEditSurfaceThread;
 
-    View.OnLongClickListener onLongClickListener;
     OnEdgeSwipeTouchListener onSwipeTouchListener;
+
+    public final int BLUE = 0;
+    public final int BLACK = 1;
 
 
     /**
@@ -119,12 +122,27 @@ public class EditFragment extends Fragment {
                 Log.d("EDGESWIPE", "right");
                 mEditSurfaceView.onClickRedo();
             }
-
-
         };
 
         mEditSurfaceView.setFocusable(true);
         view.setOnTouchListener(onSwipeTouchListener);
+
+        Button blueButton = (Button) view.findViewById(R.id.button_blue);
+        Button blackButton = (Button) view.findViewById(R.id.button_black);
+
+        blueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditSurfaceView.setDrawingMode(BLUE);
+            }
+        });
+
+        blackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditSurfaceView.setDrawingMode(BLACK);
+            }
+        });
 
         return view;
     }

@@ -152,9 +152,6 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     public Paint mBluePaint;
     public Paint mSelectedPaint;
 
-    public final String BLUE_INK = "blue_ink";
-    public final String BLACK_INK = "black_ink";
-
     public final int BLUE = 0;
     public final int BLACK = 1;
 
@@ -164,7 +161,6 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     ArrayList<Point> mBlackPoints = new ArrayList<Point>();
     ArrayList<Path> mBlackPaths = new ArrayList<Path>();
-
     private ArrayList<Panel> mPanels = new ArrayList<Panel>();
 
     private ArrayList<Path> undonePaths = new ArrayList<Path>();
@@ -192,8 +188,6 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
 
-
-
         // create thread only; it's started in surfaceCreated()
         thread = new EditSurfaceThread(surfaceHolder, context, new Handler() {
             @Override
@@ -201,6 +195,8 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
             }
         });
+
+        setDrawingMode(BLACK);
 
         mBluePaths.clear();
         undonePaths.clear();
@@ -217,6 +213,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         initPaint(mSelectedPaint);
         mSelectedPaint.setStyle(Paint.Style.FILL);
         mSelectedPaint.setColor(getResources().getColor(R.color.pink_alpha));
+        mSelectedPaint.setStrokeWidth(0);
 
         mCurrentPath = new Path();
 
@@ -256,6 +253,28 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    public void setDrawingMode(int mode) {
+        switch (mode) {
+            case BLUE:
+                drawing_mode = BLUE;
+                break;
+            case BLACK:
+                drawing_mode = BLACK;
+                break;
+        }
+
+        Log.d(TAG, "switched to drawging in " + mode);
+        invalidate();
+    }
+
+    public boolean isDrawingModeBlack() {
+        return drawing_mode == BLACK;
+    }
+
+    public boolean isDrawingModeBlue() {
+        return drawing_mode == BLUE;
+    }
+
     //variable for counting two successive up-down events
     int clickCount = 0;
     //variable for storing the time of first click
@@ -275,8 +294,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         switch(action) {
             case MotionEvent.ACTION_DOWN:
-                startTime = System.currentTimeMillis();
-                clickCount++;
+                if(isDrawingModeBlack()) {
+                    startTime = System.currentTimeMillis();
+                    clickCount++;
+                }
 
                 touch_start(x, y);
                 invalidate();
@@ -286,22 +307,23 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-                long time = System.currentTimeMillis() - startTime;
-                duration = duration + time;
-                if (clickCount == 2) {
-                    if (duration <= MAX_DURATION) {
-                        Log.d(TAG, "tap tap");
+                if(isDrawingModeBlack()) {
+                    long time = System.currentTimeMillis() - startTime;
+                    duration = duration + time;
+                    if (clickCount == 2) {
+                        if (duration <= MAX_DURATION) {
+                            Log.d(TAG, "tap tap");
 
-                        selectedPanel = try_to_find_panel(x, y);
+                            selectedPanel = try_to_find_panel(x, y);
+                        }
+                        clickCount = 0;
+                        duration = 0;
+
+                    } else if (duration > MAX_DURATION) {
+                        clickCount = 0;
+                        duration = 0;
 
                     }
-                    clickCount = 0;
-                    duration = 0;
-
-                } else if (duration > MAX_DURATION) {
-                    clickCount = 0;
-                    duration = 0;
-
                 }
 
                 touch_up();
@@ -322,7 +344,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         mX = x;
         mY = y;
 
-        if(drawing_mode == BLACK) {
+        if(isDrawingModeBlack()) {
             mBlackPoints.add(new Point((int) x, (int) y));
         }
     }
@@ -340,19 +362,25 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private void touch_up() {
         mCurrentPath.lineTo(mX, mY);
 
-        mBluePaths.add(mCurrentPath);
-        mCurrentPath = new Path();
+        if (isDrawingModeBlue()) {
+            mBluePaths.add(mCurrentPath);
+        }
 
         Log.d("", "pathsize:::" + mBluePaths.size());
         Log.d("", "undonepathsize:::" + undonePaths.size());
 
-        if(drawing_mode == BLACK) {
+        if(isDrawingModeBlack()) {
+            mBlackPaths.add(mCurrentPath);
             mBlackPoints.add(new Point((int) mX, (int) mY));
+            selectedPanel = null;
+
+            if (mBlackPoints.size() >= 4 ) {
+                check_shape();
+            }
         }
 
-        if(drawing_mode == BLACK && mBlackPoints.size() >= 4 ) {
-            check_shape();
-        }
+        mCurrentPath = new Path();
+
     }
 
     public void onClickUndo() {
@@ -384,18 +412,26 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawPath(mCurrentPath, mBlackPaint);
+        if (isDrawingModeBlue()) {
+            canvas.drawPath(mCurrentPath, mBluePaint);
 
-        for (Path pBlue : mBluePaths) {
-            canvas.drawPath(pBlue, mBluePaint);
+            for (Path pBlue : mBluePaths) {
+                canvas.drawPath(pBlue, mBluePaint);
+            }
         }
 
-        for (Panel panel : mPanels) {
-            canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
-        }
+        if (isDrawingModeBlack()) {
+            for (Panel panel : mPanels) {
+                canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
+            }
 
-        if (selectedPanel != null) {
-            canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
+            if (selectedPanel != null) {
+                canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
+            }
+
+            for (Path pathBlack : mBlackPaths) {
+                canvas.drawPath(pathBlack, mBlackPaint);
+            }
         }
     }
 
@@ -444,6 +480,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
             Log.d(TAG, "rect added");
             mBlackPoints.clear();
+            mBlackPaths.clear();
 
         } else {
             mBlackPoints.clear();
