@@ -150,6 +150,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private Path mCurrentPath;
     public Paint mBlackPaint;
     public Paint mBluePaint;
+    public Paint mSelectedPaint;
 
     public final String BLUE_INK = "blue_ink";
     public final String BLACK_INK = "black_ink";
@@ -167,6 +168,8 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private ArrayList<Panel> mPanels = new ArrayList<Panel>();
 
     private ArrayList<Path> undonePaths = new ArrayList<Path>();
+
+    private Panel selectedPanel;
 
     public EditSurfaceView(Context context) {
         super(context);
@@ -203,26 +206,30 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         undonePaths.clear();
 
         mBlackPaint = new Paint();
-        mBlackPaint.setAntiAlias(true);
-        //mBlackPaint.setDither(true);
-        mBlackPaint.setStyle(Paint.Style.STROKE);
+        initPaint(mBlackPaint);
         mBlackPaint.setColor(Color.BLACK);
-        mBlackPaint.setStrokeJoin(Paint.Join.ROUND);
-        mBlackPaint.setStrokeCap(Paint.Cap.ROUND);
-        mBlackPaint.setStrokeWidth(4);
 
         mBluePaint = new Paint();
-        mBluePaint.setAntiAlias(true);
-        //mBluePaint.setDither(true);
-        mBluePaint.setStyle(Paint.Style.STROKE);
+        initPaint(mBluePaint);
         mBluePaint.setColor(getResources().getColor(R.color.non_photo_blue));
-        mBluePaint.setStrokeJoin(Paint.Join.ROUND);
-        mBluePaint.setStrokeCap(Paint.Cap.ROUND);
-        mBluePaint.setStrokeWidth(4);
+
+        mSelectedPaint = new Paint();
+        initPaint(mSelectedPaint);
+        mSelectedPaint.setStyle(Paint.Style.FILL);
+        mSelectedPaint.setColor(getResources().getColor(R.color.pink_alpha));
 
         mCurrentPath = new Path();
 
         setFocusable(true);
+    }
+
+    public void initPaint(Paint p) {
+        p.setAntiAlias(true);
+        //mBlackPaint.setDither(true);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeJoin(Paint.Join.ROUND);
+        p.setStrokeCap(Paint.Cap.ROUND);
+        p.setStrokeWidth(4);
     }
 
     @Override
@@ -249,6 +256,15 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    //variable for counting two successive up-down events
+    int clickCount = 0;
+    //variable for storing the time of first click
+    long startTime;
+    //variable for calculating the total time
+    long duration;
+    //constant for defining the time duration between the click that can be considered as double-tap
+    static final int MAX_DURATION = 500;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
@@ -259,6 +275,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         switch(action) {
             case MotionEvent.ACTION_DOWN:
+                startTime = System.currentTimeMillis();
+                clickCount++;
+
                 touch_start(x, y);
                 invalidate();
                 break;
@@ -267,6 +286,24 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
+                long time = System.currentTimeMillis() - startTime;
+                duration = duration + time;
+                if (clickCount == 2) {
+                    if (duration <= MAX_DURATION) {
+                        Log.d(TAG, "tap tap");
+
+                        selectedPanel = try_to_find_panel(x, y);
+
+                    }
+                    clickCount = 0;
+                    duration = 0;
+
+                } else if (duration > MAX_DURATION) {
+                    clickCount = 0;
+                    duration = 0;
+
+                }
+
                 touch_up();
                 invalidate();
                 break;
@@ -313,7 +350,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
             mBlackPoints.add(new Point((int) mX, (int) mY));
         }
 
-        if(drawing_mode == BLACK && mBlackPoints.size() >= 3 ) {
+        if(drawing_mode == BLACK && mBlackPoints.size() >= 4 ) {
             check_shape();
         }
     }
@@ -355,6 +392,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         for (Panel panel : mPanels) {
             canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
+        }
+
+        if (selectedPanel != null) {
+            canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
         }
     }
 
@@ -409,6 +450,35 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
             Log.d(TAG, "points cleared");
 
         }
+    }
+
+    public Panel try_to_find_panel(float x, float y) {
+        boolean existsX = false;
+        boolean existsY = false;
+
+        Panel foundPanel = null;
+
+        for (Panel panel : mPanels) {
+            if (panel.getX() < (int) x && (int) x < (panel.getX() + panel.getWidth())) {
+                Log.d(TAG, "found panel within x");
+                existsX = true;
+            }
+
+            if (panel.getY() < (int) y && (int) y < (panel.getY() + panel.getHeight())) {
+                Log.d(TAG, "found panel within y");
+                existsY = true;
+            }
+
+            if (existsX && existsY) {
+                Log.d(TAG, "found panel!");
+                foundPanel = panel;
+            } else {
+                existsX = false;
+                existsY = false;
+            }
+        }
+
+        return foundPanel;
     }
 
     @Override
