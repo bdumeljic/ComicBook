@@ -17,8 +17,12 @@ import com.bdumeljic.comicbook.dummy.DummyContent;
 import java.util.ArrayList;
 
 /**
- * A fragment representing a list of Items.
+ * Fragment used for switching between volume pages.
+ * </p>
+ * Representing a list of pages that are in the volume that is being edited.
  * <p/>
+ * A fragment used in the sliding drawer in the {@link com.bdumeljic.comicbook.EditActivity}.
+ * This fragment is used to set the drawing settings while editing a comic book volume.
  * <p/>
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
@@ -33,9 +37,17 @@ public class PagesFragment extends ListFragment {
 
     private OnFragmentInteractionListener mListener;
 
-    PagesAdapter mAdapter;
+    /** Adapter holding the pages. */
+    PagesAdapter mPagesAdapter;
 
-    public static PagesFragment newInstance(int project, int volume) {
+    /**
+     * Create a new instance of the fragment with the provided project ID and volume ID.
+     *
+     * @param project Project id
+     * @param volume Volume id
+     * @return Fragment with a list populated by the pages of the provided project and volume.
+     */
+     public static PagesFragment newInstance(int project, int volume) {
         PagesFragment fragment = new PagesFragment();
         Bundle args = new Bundle();
         args.putInt(PROJECT, project);
@@ -51,6 +63,10 @@ public class PagesFragment extends ListFragment {
     public PagesFragment() {
     }
 
+    /**
+     * Retrieve the pages for the specified project's volume and populate the list's adapter with these pages.
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,16 +76,10 @@ public class PagesFragment extends ListFragment {
             mVolume = getArguments().getInt(VOLUME, -1);
         }
 
-        Log.d("PAGES", "project " + mProject + " vol " + mVolume);
-
         ArrayList<PageModel.Page> mPages = ProjectModel.getProject(mProject).getVolume(mVolume).getPages();
 
-        // TODO: Change Adapter to display your content
-        //setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-          //      android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS));
-
-        mAdapter = new PagesAdapter(mPages);
-        setListAdapter(mAdapter);
+        mPagesAdapter = new PagesAdapter(mPages);
+        setListAdapter(mPagesAdapter);
     }
 
 
@@ -117,10 +127,17 @@ public class PagesFragment extends ListFragment {
         public void onFragmentInteraction(String id);
     }
 
+    /**
+     * Adapter that holds a list of pages for the specified project's volume .
+     */
     protected class PagesAdapter extends BaseAdapter {
 
         private ArrayList<PageModel.Page> mPages;
 
+        /**
+         * Create a new PagesAdapter with the provided list of pages.
+         * @param pages List of pages
+         */
         public PagesAdapter(ArrayList<PageModel.Page> pages) {
             super();
             this.mPages = pages;

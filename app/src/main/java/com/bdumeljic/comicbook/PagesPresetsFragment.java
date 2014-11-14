@@ -10,11 +10,12 @@ import android.widget.ListView;
 import com.bdumeljic.comicbook.dummy.DummyContent;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of preset page layouts made out of panels.
  * <p/>
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
- * interface.
+ * A fragment used in the sliding drawer in the {@link com.bdumeljic.comicbook.EditActivity}.
+ * This fragment is used to set the drawing settings while editing a comic book volume.
+ * </p>
+ * TODO Implement presets.
  */
 public class PagesPresetsFragment extends ListFragment {
 

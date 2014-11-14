@@ -13,11 +13,13 @@ import android.widget.Toast;
 
 import com.bdumeljic.comicbook.Models.ProjectModel;
 
-
+/**
+ * Activity that controls the editing process. It holds all the sliding drawer fragments used in {@link com.bdumeljic.comicbook.NavigationDrawerFragment} as well as the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
+ */
 public class EditActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, PagesPresetsFragment.OnFragmentInteractionListener, PagesFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
 
     /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     * Fragment managing the selection of the current page, page layout preset selection and drawing settings.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
@@ -32,13 +34,22 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
     public static final int BLACK = 1;
     public static final int CLEAR = 2;
 
+    /** Fragment used for switching between volume pages. */
     PagesFragment pages;
+    /** Fragment used for selecting page layout presets. */
     PagesPresetsFragment presets;
+    /** Fragment used for drawing settings. */
     SettingsFragment settings;
 
+    /** Project that is currently open and being edited. */
     public int mProjectId;
+    /** Volume that is currently open and being edited. */
     public int mVolId;
 
+    /**
+     * Open the project and volume. Set the pages of the sliding drawer {@link com.bdumeljic.comicbook.PagesFragment}.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +112,10 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Manage the fragment changes in the sliding drawer.
+     * @param position
+     */
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the drawer content by replacing fragments
@@ -146,6 +161,12 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
 
     }
 
+    /**
+     * Manage the interactions that happened in the {@link com.bdumeljic.comicbook.NavigationDrawerFragment}.
+     *
+     * @param type Setting that was changed
+     * @param bool
+     */
     @Override
     public void onFragmentInteraction(int type, Boolean bool) {
         EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);

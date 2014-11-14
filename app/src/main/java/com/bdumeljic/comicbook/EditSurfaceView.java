@@ -20,10 +20,16 @@ import com.bdumeljic.comicbook.Models.Panel;
 
 import java.util.ArrayList;
 
+/**
+ * Custom {@link android.view.SurfaceView} used for drawing the page layout. One surface is one page in a comic book volume.
+ */
 class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private String TAG = "EditSurfaceView";
 
+    /**
+     * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
+     */
     class EditSurfaceThread extends Thread {
 
         private SurfaceHolder mSurfaceHolder;
@@ -147,27 +153,44 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     SurfaceHolder surfaceHolder;
     volatile boolean running = false;
 
+    /** Path that is currently being drawn. */
     private Path mCurrentPath;
+
+    /** Paint object that paints black ink. */
     public Paint mBlackPaint;
+    /** Paint object that paints blue ink. */
     public Paint mBluePaint;
+    /** Paint object that paints selected panel objects. */
     public Paint mSelectedPaint;
 
     public final int BLUE = 0;
     public final int BLACK = 1;
 
+    /** Variable that keeps track of which drawing mode is used (black or blue ink). */
     public int drawing_mode;
 
+    /** Visibility of the blue ink. */
     public boolean visibilityBlue;
+    /** Visibility of the black ink. */
     public boolean visibilityBlack;
 
+    /** List of the paths drawn with blue ink on the canvas. */
     ArrayList<Path> mBluePaths = new ArrayList<Path>();
 
+    /**
+     * List of the points of the paths drawn with black ink on the canvas.
+     * Used to retrace the steps made if a valid panel has been drawn
+     * */
     ArrayList<Point> mBlackPoints = new ArrayList<Point>();
+    /** List of the paths drawn with black ink on the canvas. */
     ArrayList<Path> mBlackPaths = new ArrayList<Path>();
+    /** List of the panels drawn on the canvas. */
     private ArrayList<Panel> mPanels = new ArrayList<Panel>();
 
+    /** List of the paths that were drawn, but have been undone. Used for the redo function. */
     private ArrayList<Path> undonePaths = new ArrayList<Path>();
 
+    /** Reference to the selected panel. */
     private Panel selectedPanel;
 
     public EditSurfaceView(Context context) {
@@ -186,6 +209,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         return thread;
     }
 
+    /**
+     * Setup the drawing surface. Start with blue ink.
+     * @param context
+     */
     public void init(Context context) {
 
         surfaceHolder = getHolder();
@@ -225,6 +252,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         setFocusable(true);
     }
 
+    /**
+     * Setup a Paint object.
+     * @param p
+     */
     public void initPaint(Paint p) {
         p.setAntiAlias(true);
         //mBlackPaint.setDither(true);
@@ -258,6 +289,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Set the current drawing mode. Which can either be blue or black ink.
+     * @param mode Blue or black ink
+     */
     public void setDrawingMode(int mode) {
         switch (mode) {
             case BLUE:
@@ -274,15 +309,27 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         invalidate();
     }
 
+    /**
+     * Check if the current drawing ink is black.
+     * @return True or false for black being the current drawing mode.
+     */
     public boolean isDrawingModeBlack() {
         return drawing_mode == BLACK;
     }
 
+    /**
+     * Check if the current drawing ink is blue.
+     * @return True or false for blue being the current drawing mode.
+     */
     public boolean isDrawingModeBlue() {
         return drawing_mode == BLUE;
 
     }
 
+    /**
+     * Toggle the blue ink to be permanently visible or not. Even if the user is drawing in black.
+     * @param visible Boolean value of blue ink visibility
+     */
     public void toggleVisibilityBlue(Boolean visible) {
         if(!visible) {
             visibilityBlue = false;
@@ -298,6 +345,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         Log.d(TAG, "toggle blue to  " + String.valueOf(visibilityBlue));
     }
 
+    /**
+     * Toggle the black ink to be permanently visible or not. Even if the user is drawing in blue.
+     * @param visible  Boolean value of black ink visibility
+     */
     public void toggleVisibilityBlack(Boolean visible) {
         if(!visible) {
             visibilityBlack = false;
@@ -313,15 +364,20 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         Log.d(TAG, "toggle black to  " + String.valueOf(visibilityBlack));
     }
 
-    //variable for counting two successive up-down events
+    /** Variable for counting two successive up-down events for the selection of panels. */
     int clickCount = 0;
-    //variable for storing the time of first click
+    /** Variable for storing the time of first click. */
     long startTime;
-    //variable for calculating the total time
+    /** Variable for calculating the total time */
     long duration;
-    //constant for defining the time duration between the click that can be considered as double-tap
+    /** Constant for defining the time duration between the click that can be considered as double-tap. */
     static final int MAX_DURATION = 500;
 
+    /**
+     * Handle all the touch events on the canvas, e.g. drawing and selecting panels.
+     * @param event
+     * @return
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
@@ -332,12 +388,16 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         switch(action) {
             case MotionEvent.ACTION_DOWN:
+                // Start check for a double tap if in BLACK mode
                 if(isDrawingModeBlack()) {
                     startTime = System.currentTimeMillis();
                     clickCount++;
                 }
 
+                // Start a draw event
                 touch_start(x, y);
+
+                // Redraw the view
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -345,6 +405,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
+                // Check for a double tap used for panel selection if in BLACK drawing mode
                 if(isDrawingModeBlack()) {
                     long time = System.currentTimeMillis() - startTime;
                     duration = duration + time;
@@ -373,8 +434,16 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private float mX, mY;
+    /** Minimum touch distance */
     private static final float TOUCH_TOLERANCE = 4;
 
+    /**
+     * Start a touch event from the provided location.
+     * </p>
+     * Reset the undone paths array when drawing is resumed.
+     * @param x X value of touch starting point
+     * @param y Y value of touch starting point
+     */
     private void touch_start(float x, float y) {
         undonePaths.clear();
         mCurrentPath.reset();
@@ -382,11 +451,17 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         mX = x;
         mY = y;
 
+        // Add this new point to the black points array if BLACK mode is on
         if(isDrawingModeBlack()) {
             mBlackPoints.add(new Point((int) x, (int) y));
         }
     }
 
+    /**
+     * Handle a move event. Continue drawing the path.
+     * @param x
+     * @param y
+     */
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
@@ -397,6 +472,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Handle the end of a touch or draw. Check if this was a double tap for panel selection or the drawing of a line.
+     */
     private void touch_up() {
         mCurrentPath.lineTo(mX, mY);
 
@@ -407,6 +485,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         Log.d("", "pathsize:::" + mBluePaths.size());
         Log.d("", "undonepathsize:::" + undonePaths.size());
 
+        // Check for double tap
         if(isDrawingModeBlack()) {
             mBlackPaths.add(mCurrentPath);
             mBlackPoints.add(new Point((int) mX, (int) mY));
@@ -426,6 +505,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     }
 
+    /**
+     * Undo the previous drawing action. Inform the user of this action.
+     */
     public void onClickUndo() {
         Log.d("", "pathsize:::" + mBluePaths.size());
         Log.d("", "undonepathsize:::" + undonePaths.size());
@@ -439,6 +521,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Redo a drawing action that has been undone. Inform the user of this action.
+     */
     public void onClickRedo() {
         Log.e("", "pathsize:::" + mBluePaths.size());
         Log.e("", "undonepathsize:::" + undonePaths.size());
@@ -452,16 +537,23 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Handle drawing the drawn object on the canvas. Take into account which layer (BLUE or BLACK) is visible.
+     * @param canvas Canvas that is being drawn on
+     */
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
         if (isDrawingModeBlue()) {
+            // Draw the latest blue path.
             canvas.drawPath(mCurrentPath, mBluePaint);
 
+            // Draw the older blue paths.
             for (Path pBlue : mBluePaths) {
                 canvas.drawPath(pBlue, mBluePaint);
             }
 
+            // Draw the black panels if the black ink is visible.
             if(visibilityBlack) {
                 for (Panel panel : mPanels) {
                     canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
@@ -470,21 +562,26 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         if (isDrawingModeBlack()) {
+            // First draw all the panels.
             for (Panel panel : mPanels) {
                 canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
             }
 
+            // If a panel is selected redraw it with the selected paint.
             if (selectedPanel != null) {
                 canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
                 Log.d(TAG, "there is a selected panel");
             }
 
+            // Add the latest path.
             canvas.drawPath(mCurrentPath, mBlackPaint);
 
+            // Add older paths.
             for (Path pathBlack : mBlackPaths) {
                 canvas.drawPath(pathBlack, mBlackPaint);
             }
 
+            // Add the blue paths if blue ink is visible.
             if(visibilityBlue) {
                 for (Path pBlue : mBluePaths) {
                     canvas.drawPath(pBlue, mBluePaint);
@@ -493,23 +590,27 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Check if the shape that has been drawn is a proper rectangle.
+     */
     public void check_shape() {
-
-        Log.d(TAG, "entered check shape " + mBlackPoints.toString());
-
+        /** Minimal required height/width */
         int SHAPE_THRESHOLD = 100;
 
+        /** Panel width */
         float width = 0;
+        /** Panel height */
         float height = 0;
 
+        /** Panel starting point X value */
         int startX = mBlackPoints.get(0).x;
+        /** Panel starting point Y value */
         int startY = mBlackPoints.get(0).y;
 
+        /** Vertical difference between point 1 and point 2 */
         float diffY1 = mBlackPoints.get(1).y - mBlackPoints.get(0).y;
+        /** Horizontal difference between point 1 and point 2 */
         float diffX1 = mBlackPoints.get(1).x - mBlackPoints.get(0).x;
-
-        Log.d(TAG, "diff " + diffX1 + " " + diffY1);
-
 
         if (Math.abs(diffX1) > SHAPE_THRESHOLD || Math.abs(diffY1) > SHAPE_THRESHOLD) {
             Log.d(TAG, "proper shape detected 1");
@@ -520,7 +621,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
 
+        /** Vertical difference between point 3 and point 4 */
         float diffY2 = mBlackPoints.get(3).y - mBlackPoints.get(2).y;
+        /** Horizontal difference between point 3 and point 4 */
         float diffX2 = mBlackPoints.get(3).x - mBlackPoints.get(2).x;
 
         if (Math.abs(diffX2) > SHAPE_THRESHOLD || Math.abs(diffY2) > SHAPE_THRESHOLD) {
@@ -547,6 +650,14 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    /**
+     * Try to select a panel at the provided location by checking if a panel exists there.
+     * This check is performed after a double tap on the canvas.
+     *
+     * @param x X value of the double tap
+     * @param y Y value of the double tap
+     * @return Panel that was found or null
+     */
     public Panel try_to_find_panel(float x, float y) {
         boolean existsX = false;
         boolean existsY = false;
@@ -576,6 +687,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         return foundPanel;
     }
 
+    /**
+     * Remove everything that was drawn on this page.
+     */
     public void clearPage() {
         mBluePaths.clear();
         mBlackPaths.clear();

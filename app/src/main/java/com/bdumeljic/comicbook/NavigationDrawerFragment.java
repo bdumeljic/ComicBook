@@ -17,9 +17,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
- * Fragment used for managing interactions for and presentation of a navigation drawer.
- * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
- * design guidelines</a> for a complete explanation of the behaviors implemented here.
+ * Fragment used as a sliding drawer. This holds the {@link com.bdumeljic.comicbook.PagesFragment}, {@link com.bdumeljic.comicbook.PagesPresetsFragment} and {@link com.bdumeljic.comicbook.SettingsFragment} fragments.
+ *
  */
 public class NavigationDrawerFragment extends Fragment {
 

@@ -21,13 +21,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing the list of comic book projects.
  * <p />
- * Large screen devices (such as tablets) are supported by replacing the ListView
- * with a GridView.
- * <p />
- * Activities containing this fragment MUST implement the {@link Callbacks}
- * interface.
+ * Activities containing this fragment MUST implement the
+ * interface to the {@link com.bdumeljic.comicbook.ProjectActivity} in order for project selection events to be handled.
  */
 public class ProjectFragment extends Fragment implements AbsListView.OnItemClickListener {
 
@@ -36,23 +33,20 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     private Random random = new Random();
 
     /**
-     * The fragment's ListView/GridView.
+     * The fragment's GridView containing the comic book projects.
      */
     private AbsListView mGridView;
 
     /**
-     * The Adapter which will be used to populate the ListView/GridView with
+     * The Adapter which will be used to populate the gridView with
      * Views.
      */
-    private ArrayList<ProjectModel.Project> mProjects;
     private ListAdapter mAdapter;
 
-    public static ProjectFragment newInstance(String param1, String param2) {
-        ProjectFragment fragment = new ProjectFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    /**
+     * List of comic book projects.
+     */
+    private ArrayList<ProjectModel.Project> mProjects;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -61,19 +55,23 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     public ProjectFragment() {
     }
 
+    /**
+     * Get the user's projects from the {@link com.bdumeljic.comicbook.Models.ProjectModel} and populate the adapter with these projects.
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mProjects = ProjectModel.getProjects();
-
-        // TODO: Change Adapter to display your content
-       // mAdapter = new ArrayAdapter<ProjectModel.Project>(getActivity(),
-         //       android.R.layout.simple_list_item_1, android.R.id.text1, ProjectModel.getProjects());
-
         mAdapter = new ProjectsAdapter(mProjects);
     }
 
+    /**
+     * Inflate the gridview and add an onItemClickListener to it.
+     *
+     * @return The inflated view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -133,24 +131,29 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     }
 
     /**
+     * This passes on the selected projects to the activity.
+     * </p>
     * This interface must be implemented by activities that contain this
     * fragment to allow an interaction in this fragment to be communicated
     * to the activity and potentially other fragments contained in that
     * activity.
-    * <p>
-    * See the Android Training lesson <a href=
-    * "http://developer.android.com/training/basics/fragments/communicating.html"
-    * >Communicating with Other Fragments</a> for more information.
     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(ProjectModel.Project p);
     }
 
+    /**
+     * Adapter that holds all the comic book projects.
+     */
     protected class ProjectsAdapter extends BaseAdapter {
 
         private ArrayList<ProjectModel.Project> mProjects;
 
+        /**
+         * Create a new ProjectsAdapter with the provided list of projects.
+         * @param projects List of comic book projects
+         */
         public ProjectsAdapter(ArrayList<ProjectModel.Project> projects) {
             super();
             this.mProjects = projects;
@@ -171,6 +174,13 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
             return position;
         }
 
+        /**
+         * Inflate one comicbook project that goes into the gridview holding the list of projects.
+         * @param row
+         * @param convertView
+         * @param parent
+         * @return
+         */
         @Override
         public View getView(int row, View convertView, ViewGroup parent) {
             if (convertView == null) {

@@ -13,7 +13,8 @@ import android.widget.Button;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
+ * </p>
  * Use the {@link EditFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
@@ -24,19 +25,23 @@ public class EditFragment extends Fragment {
     public final static String PROJECT = "param_project";
     public final static String VOLUME = "param_volume";
 
+    /** Project being edited */
     private int mProject;
+    /** Volume being edited */
     private int mVolume;
 
+    /** View that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} */
     private View mDecorView;
 
+    /** Surface used for drawing, this is one page in the comic book volume */
     private EditSurfaceView mEditSurfaceView;
     private EditSurfaceView.EditSurfaceThread mEditSurfaceThread;
 
+    /** Listener used to detect the undo and redo actions. */
     OnEdgeSwipeTouchListener onSwipeTouchListener;
 
     public final int BLUE = 0;
     public final int BLACK = 1;
-
 
     /**
      * Start a new EditFragment in which the page layout of a specified volume of a comic book can be edited.
@@ -74,6 +79,10 @@ public class EditFragment extends Fragment {
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    /**
+     * Enter fullscreen immersive more to provide more room for the content.
+     * @param savedInstanceState
+     */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -148,7 +157,7 @@ public class EditFragment extends Fragment {
         return view;
     }
 
-    // This hides the system bars
+    /** Hide the system bars */
     public void hideSystemUI() {
         // Hide all the system bars so the user can focus on the drawing
         mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -161,6 +170,10 @@ public class EditFragment extends Fragment {
         mEditSurfaceView.refreshDrawableState();
     }
 
+    /**
+     * Get the surface view that is being drawn on.
+     * @return {@link com.bdumeljic.comicbook.EditSurfaceView}
+     */
     public EditSurfaceView getSurfaceView() {
         return mEditSurfaceView;
     }

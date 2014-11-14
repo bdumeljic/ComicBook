@@ -15,7 +15,11 @@ import com.bdumeljic.comicbook.Models.VolumeModel;
 
 import java.util.ArrayList;
 
-
+/**
+ *  Activity that controls the selection of projects and volumes.
+ *
+ *  This is the launcher activity.
+ */
 public class ProjectActivity extends Activity implements ProjectFragment.OnFragmentInteractionListener {
 
     public final static String PROJECT = "param_project";
@@ -33,7 +37,6 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -54,11 +57,18 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Handles the interaction that happened in the fragment that it controls.
+     *
+     * This is called when a project has been selected. This opens a dialog that enables the user to choose a volume to edit. After a volume has been selected, this starts the edit activity.
+     *
+     * @param project Selected project
+     */
     @Override
-    public void onFragmentInteraction(final ProjectModel.Project p) {
+    public void onFragmentInteraction(final ProjectModel.Project project) {
         mVolNames = new ArrayList<String>();
 
-        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) p.getVolumes()) {
+        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) project.getVolumes()) {
             if (vol.getVolName() != null) {
                 mVolNames.add(vol.getVolName());
             }
@@ -80,7 +90,7 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
                         // of the selected item
 
                         Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
-                        editIntent.putExtra(PROJECT, p.getProjectId());
+                        editIntent.putExtra(PROJECT, project.getProjectId());
                         editIntent.putExtra(VOLUME, which);
                         startActivity(editIntent);
                     }

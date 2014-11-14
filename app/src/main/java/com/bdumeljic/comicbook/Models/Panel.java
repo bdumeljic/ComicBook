@@ -11,6 +11,14 @@ public class Panel {
     int id;
     static int count = 0;
 
+    /**
+     * Create a new panel
+     *
+     * @param point Starting point of the pane
+     * @param height Height of the panel
+     * @param width Width of the panel
+     * @param id Panel ID
+     */
     public Panel(Context context, Point point, int height, int width, int id) {
         this.id = count++;
         mContext = context;
@@ -19,31 +27,37 @@ public class Panel {
         this.width = width;
     }
 
+    /**
+     * Get the width of a panel
+     *
+     * @return Width of this panel
+     */
     public int getWidth() {
         return this.width;
     }
 
+    /**
+     * Get the height of a panel
+     *
+     * @return Height of this panel
+     */
     public int getHeight() {
         return this.height;
     }
 
+    /**
+     * Get the x value of the panel's starting point
+     * @return X value of the starting point
+     */
     public int getX() {
         return start.x;
     }
 
+    /**
+     * Get the y value of the panel's starting point
+     * @return Y value of the starting point
+     */
     public int getY() {
         return start.y;
-    }
-
-    public int getID() {
-        return id;
-    }
-
-    public void setX(int x) {
-        start.x = x;
-    }
-
-    public void setY(int y) {
-        start.y = y;
     }
 }

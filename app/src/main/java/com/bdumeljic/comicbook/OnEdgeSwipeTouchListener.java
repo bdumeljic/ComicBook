@@ -7,6 +7,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
+/**
+ * Listener used to detect UNDO and REDO actions.
+ */
 public class OnEdgeSwipeTouchListener implements OnTouchListener {
 
     private final GestureDetector gestureDetector = new GestureDetector(new GestureListener());
@@ -25,6 +28,15 @@ public class OnEdgeSwipeTouchListener implements OnTouchListener {
             return true;
         }
 
+        /**
+         * Recognizes undo and redo actions.
+         *
+         * @param e1
+         * @param e2
+         * @param velocityX
+         * @param velocityY
+         * @return
+         */
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             boolean result = false;
