@@ -157,8 +157,8 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     public int drawing_mode;
 
-    public boolean visibilityBlue = true;
-    public boolean visibilityBlack = false;
+    public boolean visibilityBlue;
+    public boolean visibilityBlack;
 
     ArrayList<Path> mBluePaths = new ArrayList<Path>();
 
@@ -201,7 +201,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         setDrawingMode(BLUE);
         visibilityBlue = false;
-        visibilityBlack = true;
+        visibilityBlack = false;
 
         mBluePaths.clear();
         undonePaths.clear();
@@ -218,13 +218,11 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         initPaint(mSelectedPaint);
         mSelectedPaint.setStyle(Paint.Style.FILL);
         mSelectedPaint.setColor(getResources().getColor(R.color.pink_alpha));
-        mSelectedPaint.setStrokeWidth(0);
+        mSelectedPaint.setStrokeWidth(6);
 
         mCurrentPath = new Path();
 
         setFocusable(true);
-
-
     }
 
     public void initPaint(Paint p) {
@@ -412,11 +410,16 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         if(isDrawingModeBlack()) {
             mBlackPaths.add(mCurrentPath);
             mBlackPoints.add(new Point((int) mX, (int) mY));
-            selectedPanel = null;
 
-            if (mBlackPoints.size() >= 4 ) {
+            if (mBlackPoints.size() >= 4) {
                 check_shape();
             }
+
+            if (mBlackPoints.size() >= 1 && selectedPanel != null) {
+                selectedPanel = null;
+                Log.d(TAG, "panel deselected");
+            }
+
         }
 
         mCurrentPath = new Path();
@@ -473,6 +476,7 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
             if (selectedPanel != null) {
                 canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
+                Log.d(TAG, "there is a selected panel");
             }
 
             canvas.drawPath(mCurrentPath, mBlackPaint);
@@ -583,6 +587,9 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         mCurrentPath = new Path();
 
         invalidate();
+
+        // TODO: Ask for confirmation before clearing
+        Toast.makeText(getContext(), "Page Cleared", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -600,8 +607,10 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceDestroyed(SurfaceHolder holder) {
         boolean retry = true;
         thread.setRunning(false);
+
         while (retry) {
             try {
+                Log.d(TAG, "trying to destroy surface");
                 thread.join();
                 retry = false;
             } catch (InterruptedException e) {

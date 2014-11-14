@@ -44,6 +44,8 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         // Get the project and volume IDs that are being edited
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -136,7 +138,7 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
                     .commit();
         }
 
-        Toast.makeText(getBaseContext(), "Navigation item selected, number: " + String.valueOf(position), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getBaseContext(), "Navigation item selected, number: " + String.valueOf(position), Toast.LENGTH_SHORT).show();
     }
 
     @Override

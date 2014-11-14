@@ -102,6 +102,8 @@ public class NavigationDrawerFragment extends Fragment {
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
+        mDrawer.setFocusable(true);
+
         return mDrawer;
     }
 

@@ -71,7 +71,7 @@ public class EditFragment extends Fragment {
             getActivity().finish();
         }
 
-
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -167,21 +167,15 @@ public class EditFragment extends Fragment {
 
     @Override
     public void onResume() {
-        // TODO Auto-generated method stub
         super.onResume();
-        mEditSurfaceView.getThread().unpause();
+        //mEditSurfaceView.getThread().unpause();
         mEditSurfaceView.onResumeMySurfaceView();
     }
 
     @Override
     public void onPause() {
-        // TODO Auto-generated method stub
         super.onPause();
         mEditSurfaceView.getThread().pause();
         mEditSurfaceView.onPauseMySurfaceView();
-
     }
-
-
-
 }
