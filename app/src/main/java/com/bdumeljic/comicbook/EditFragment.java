@@ -6,10 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 
 /**
@@ -32,6 +30,7 @@ public class EditFragment extends Fragment {
     private EditSurfaceView mEditSurfaceView;
     private EditSurfaceView.EditSurfaceThread mEditSurfaceThread;
 
+    View.OnLongClickListener onLongClickListener;
     OnEdgeSwipeTouchListener onSwipeTouchListener;
 
 
@@ -120,8 +119,11 @@ public class EditFragment extends Fragment {
                 Log.d("EDGESWIPE", "right");
                 mEditSurfaceView.onClickRedo();
             }
+
+
         };
 
+        mEditSurfaceView.setFocusable(true);
         view.setOnTouchListener(onSwipeTouchListener);
 
         return view;

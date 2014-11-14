@@ -1,9 +1,7 @@
 package com.bdumeljic.comicbook;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -12,22 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bdumeljic.comicbook.Models.ProjectModel;
-import com.bdumeljic.comicbook.Models.VolumeModel;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-import static android.widget.AdapterView.OnItemClickListener;
 
 /**
  * A fragment representing a list of Items.

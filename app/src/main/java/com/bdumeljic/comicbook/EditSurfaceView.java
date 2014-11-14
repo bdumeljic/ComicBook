@@ -1,13 +1,8 @@
 package com.bdumeljic.comicbook;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.EmbossMaskFilter;
-import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -21,10 +16,14 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.bdumeljic.comicbook.Models.Panel;
+
 import java.util.ArrayList;
-import java.util.Random;
 
 class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+
+    private String TAG = "EditSurfaceView";
+
     class EditSurfaceThread extends Thread {
 
         private SurfaceHolder mSurfaceHolder;
@@ -142,26 +141,32 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     }
 
-    private String TAG = "EditSurfaceView";
-
     private Context mContext;
 
     EditSurfaceThread thread;
     SurfaceHolder surfaceHolder;
     volatile boolean running = false;
 
-   // Path path;
-   // ArrayList<Point> points = new ArrayList<Point>();
-    //ArrayList<ArrayList> paths = new ArrayList<ArrayList>();
+    private Path mCurrentPath;
+    public Paint mBlackPaint;
+    public Paint mBluePaint;
 
-    //private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    Random random;
+    public final String BLUE_INK = "blue_ink";
+    public final String BLACK_INK = "black_ink";
 
-    private Path mPath;
-    public Paint mPaint;
-    ArrayList<Path> paths = new ArrayList<Path>();
+    public final int BLUE = 0;
+    public final int BLACK = 1;
+
+    public int drawing_mode = BLACK;
+
+    ArrayList<Path> mBluePaths = new ArrayList<Path>();
+
+    ArrayList<Point> mBlackPoints = new ArrayList<Point>();
+    ArrayList<Path> mBlackPaths = new ArrayList<Path>();
+
+    private ArrayList<Panel> mPanels = new ArrayList<Panel>();
+
     private ArrayList<Path> undonePaths = new ArrayList<Path>();
-
 
     public EditSurfaceView(Context context) {
         super(context);
@@ -184,6 +189,8 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
 
+
+
         // create thread only; it's started in surfaceCreated()
         thread = new EditSurfaceThread(surfaceHolder, context, new Handler() {
             @Override
@@ -192,25 +199,30 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
             }
         });
 
-        setFocusable(true);
-
-        random = new Random();
-
-        paths.clear();
+        mBluePaths.clear();
         undonePaths.clear();
 
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        //mPaint.setDither(true);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeWidth(3);
-        mPaint.setColor(getResources().getColor(R.color.non_photo_blue));
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setStrokeWidth(4);
+        mBlackPaint = new Paint();
+        mBlackPaint.setAntiAlias(true);
+        //mBlackPaint.setDither(true);
+        mBlackPaint.setStyle(Paint.Style.STROKE);
+        mBlackPaint.setColor(Color.BLACK);
+        mBlackPaint.setStrokeJoin(Paint.Join.ROUND);
+        mBlackPaint.setStrokeCap(Paint.Cap.ROUND);
+        mBlackPaint.setStrokeWidth(4);
 
-        mPath = new Path();
+        mBluePaint = new Paint();
+        mBluePaint.setAntiAlias(true);
+        //mBluePaint.setDither(true);
+        mBluePaint.setStyle(Paint.Style.STROKE);
+        mBluePaint.setColor(getResources().getColor(R.color.non_photo_blue));
+        mBluePaint.setStrokeJoin(Paint.Join.ROUND);
+        mBluePaint.setStrokeCap(Paint.Cap.ROUND);
+        mBluePaint.setStrokeWidth(4);
 
+        mCurrentPath = new Path();
+
+        setFocusable(true);
     }
 
     @Override
@@ -239,25 +251,23 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d(TAG, "touched");
-
         int action = event.getAction();
         float x = event.getX();
         float y = event.getY();
 
+        Log.d(TAG, event.toString());
+
         switch(action) {
             case MotionEvent.ACTION_DOWN:
-                Log.d(TAG, "event: " + " down, starting new points array");
                 touch_start(x, y);
+                invalidate();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                touch_move(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
                 touch_up();
-                invalidate();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.d(TAG, "event: " + " move");
-                touch_move(x, y);
                 invalidate();
                 break;
         }
@@ -270,80 +280,135 @@ class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private void touch_start(float x, float y) {
         undonePaths.clear();
-        mPath.reset();
-        mPath.moveTo(x, y);
+        mCurrentPath.reset();
+        mCurrentPath.moveTo(x, y);
         mX = x;
         mY = y;
 
-
+        if(drawing_mode == BLACK) {
+            mBlackPoints.add(new Point((int) x, (int) y));
+        }
     }
 
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            mCurrentPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
             mY = y;
         }
     }
 
     private void touch_up() {
-        mPath.lineTo(mX, mY);
-        Canvas mCanvas = surfaceHolder.lockCanvas(null);
+        mCurrentPath.lineTo(mX, mY);
 
-        mCanvas.drawPath(mPath, mPaint);
-        paths.add(mPath);
-        mPath = new Path();
-        surfaceHolder.unlockCanvasAndPost(mCanvas);
+        mBluePaths.add(mCurrentPath);
+        mCurrentPath = new Path();
 
-        Log.e("", "pathsize:::" + paths.size());
-        Log.e("", "undonepathsize:::" + undonePaths.size());
+        Log.d("", "pathsize:::" + mBluePaths.size());
+        Log.d("", "undonepathsize:::" + undonePaths.size());
 
+        if(drawing_mode == BLACK) {
+            mBlackPoints.add(new Point((int) mX, (int) mY));
+        }
+
+        if(drawing_mode == BLACK && mBlackPoints.size() >= 3 ) {
+            check_shape();
+        }
     }
 
     public void onClickUndo() {
-
-        Log.e("", "pathsize:::" + paths.size());
-        Log.e("", "undonepathsize:::" + undonePaths.size());
-        if (paths.size() > 0) {
-            undonePaths.add(paths.remove(paths.size() - 1));
+        Log.d("", "pathsize:::" + mBluePaths.size());
+        Log.d("", "undonepathsize:::" + undonePaths.size());
+        if (mBluePaths.size() > 0) {
+            undonePaths.add(mBluePaths.remove(mBluePaths.size() - 1));
             invalidate();
 
             Toast.makeText(getContext(), "UNDO", Toast.LENGTH_SHORT).show();
-
         } else {
-
+            Toast.makeText(getContext(), getContext().getString(R.string.no_undo), Toast.LENGTH_SHORT).show();
         }
-        // toast the user
-
     }
 
     public void onClickRedo() {
-
-        Log.e("", "pathsize:::" + paths.size());
+        Log.e("", "pathsize:::" + mBluePaths.size());
         Log.e("", "undonepathsize:::" + undonePaths.size());
         if (undonePaths.size() > 0) {
-            paths.add(undonePaths.remove(undonePaths.size() - 1));
+            mBluePaths.add(undonePaths.remove(undonePaths.size() - 1));
             invalidate();
 
             Toast.makeText(getContext(), "REDO", Toast.LENGTH_SHORT).show();
         } else {
-
+            Toast.makeText(getContext(), getContext().getString(R.string.no_redo), Toast.LENGTH_SHORT).show();
         }
-        // toast the user
-
     }
 
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Log.d(TAG, "drawing");
 
-        for (Path p : paths) {
-            canvas.drawPath(p, mPaint);
+        canvas.drawPath(mCurrentPath, mBlackPaint);
+
+        for (Path pBlue : mBluePaths) {
+            canvas.drawPath(pBlue, mBluePaint);
         }
 
-        canvas.drawPath(mPath, mPaint);
+        for (Panel panel : mPanels) {
+            canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
+        }
+    }
+
+    public void check_shape() {
+
+        Log.d(TAG, "entered check shape " + mBlackPoints.toString());
+
+        int SHAPE_THRESHOLD = 100;
+
+        float width = 0;
+        float height = 0;
+
+        int startX = mBlackPoints.get(0).x;
+        int startY = mBlackPoints.get(0).y;
+
+        float diffY1 = mBlackPoints.get(1).y - mBlackPoints.get(0).y;
+        float diffX1 = mBlackPoints.get(1).x - mBlackPoints.get(0).x;
+
+        Log.d(TAG, "diff " + diffX1 + " " + diffY1);
+
+
+        if (Math.abs(diffX1) > SHAPE_THRESHOLD || Math.abs(diffY1) > SHAPE_THRESHOLD) {
+            Log.d(TAG, "proper shape detected 1");
+            if (Math.abs(diffX1) > Math.abs(diffY1) ) {
+                width = diffX1;
+            } else {
+                height = diffY1;
+            }
+        }
+
+        float diffY2 = mBlackPoints.get(3).y - mBlackPoints.get(2).y;
+        float diffX2 = mBlackPoints.get(3).x - mBlackPoints.get(2).x;
+
+        if (Math.abs(diffX2) > SHAPE_THRESHOLD || Math.abs(diffY2) > SHAPE_THRESHOLD) {
+            Log.d(TAG, "proper shape detected 2");
+            if (Math.abs(diffX2) > Math.abs(diffY2) ) {
+                width = diffX2;
+            } else {
+                height = diffY2;
+            }
+        }
+
+        if(width > 0 && height > 0) {
+            Panel panel = new Panel(getContext(), new Point(startX, startY), (int) height, (int) width, mPanels.size());
+            mPanels.add(panel);
+
+            Log.d(TAG, "rect added");
+            mBlackPoints.clear();
+
+        } else {
+            mBlackPoints.clear();
+            Log.d(TAG, "points cleared");
+
+        }
     }
 
     @Override

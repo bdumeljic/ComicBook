@@ -18,5 +18,7 @@
     <string name="settings">Settings will be here</string>
     <string name="margin">Margin</string>
     <string name="padding">Padding</string>
+    <string name="no_undo">Nothing to undo</string>
+    <string name="no_redo">Nothing to redo</string>
 
 </resources>
