@@ -23,7 +23,7 @@ import java.util.ArrayList;
 /**
  * Custom {@link android.view.SurfaceView} used for drawing the page layout. One surface is one page in a comic book volume.
  */
-class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private String TAG = "EditSurfaceView";
 
