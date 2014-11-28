@@ -1,19 +1,31 @@
 package com.bdumeljic.comicbook;
 
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 
+import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.VolumeModel;
 
+import java.util.ArrayList;
 
+/**
+ *  Activity that controls the selection of projects and volumes.
+ *
+ *  This is the launcher activity.
+ */
 public class ProjectActivity extends Activity implements ProjectFragment.OnFragmentInteractionListener {
+
+    public final static String PROJECT = "param_project";
+    public final static String VOLUME = "param_volume";
+
+    private ArrayList<String> mVolNames;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +37,6 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -46,8 +57,47 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Handles the interaction that happened in the fragment that it controls.
+     *
+     * This is called when a project has been selected. This opens a dialog that enables the user to choose a volume to edit. After a volume has been selected, this starts the edit activity.
+     *
+     * @param project Selected project
+     */
     @Override
-    public void onFragmentInteraction(String id) {
+    public void onFragmentInteraction(final ProjectModel.Project project) {
+        mVolNames = new ArrayList<String>();
 
+        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) project.getVolumes()) {
+            if (vol.getVolName() != null) {
+                mVolNames.add(vol.getVolName());
+            }
+        }
+
+        ListAdapter mAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, mVolNames);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_volumes)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // here you can add functions
+                        dialog.dismiss();
+                    }
+                })
+                .setAdapter(mAdapter, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // The 'which' argument contains the index position
+                        // of the selected item
+
+                        Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
+                        editIntent.putExtra(PROJECT, project.getProjectId());
+                        editIntent.putExtra(VOLUME, which);
+                        startActivity(editIntent);
+                    }
+                })
+                .create();
+
+        alertDialog.show();
     }
+
 }

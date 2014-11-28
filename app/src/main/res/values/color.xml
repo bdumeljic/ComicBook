@@ -2,8 +2,29 @@
 <resources>
     <color name="primary">#607d8b</color>
     <color name="primary_dark">#455a64</color>
-    <color name="accent">#FF4081</color>
+    <color name="primary_darkest">#263238</color>
+    <color name="pink">#e91e63</color>
+    <color name="pink_alpha">#50e91e63</color>
     <color name="cards">#78909c</color>
+    <color name="light_blue">#03a9f4</color>
+    <color name="blue">#5677fc</color>
+    <color name="cyan">#00bcd4</color>
+    <color name="teal">#009688</color>
+    <color name="deep_orange">#ff5722</color>
+    <color name="non_photo_blue">#A4DDED</color>
 
+
+
+    <array name="project_card_colors">
+        <item>@color/primary</item>
+        <item>@color/primary_dark</item>
+        <item>@color/pink</item>
+        <item>@color/light_blue</item>
+        <item>@color/blue</item>
+        <item>@color/cyan</item>
+        <item>@color/teal</item>
+        <item>@color/deep_orange</item>
+
+    </array>
 
 </resources>

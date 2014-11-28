@@ -2,9 +2,6 @@ package com.bdumeljic.comicbook.Models;
 
 import java.util.ArrayList;
 
-/**
- * Created by bojana on 29/10/14.
- */
 public class VolumeModel {
 
     public static class Volume {
@@ -17,16 +14,16 @@ public class VolumeModel {
             this.mVolName = name;
             this.mPages = new ArrayList<PageModel.Page>();
 
-            PageModel.Page page = new PageModel.Page(mPages.size());
-            this.addPage(page);
+            this.addPage();
         }
 
         public String getVolName() {
             return mVolName;
         }
 
-        private void addPage(PageModel.Page page) {
-            mPages.add(page);
+
+        public void addPage() {
+            mPages.add(new PageModel.Page());
         }
 
         public ArrayList getPages() {

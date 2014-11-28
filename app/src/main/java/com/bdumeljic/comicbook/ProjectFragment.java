@@ -3,58 +3,50 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListAdapter;
-import android.widget.StackView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bdumeljic.comicbook.Models.ProjectModel;
-import com.bdumeljic.comicbook.Models.VolumeModel;
 
 import java.util.ArrayList;
-
-import static android.widget.AdapterView.OnItemClickListener;
+import java.util.Random;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing the list of comic book projects.
  * <p />
- * Large screen devices (such as tablets) are supported by replacing the ListView
- * with a GridView.
- * <p />
- * Activities containing this fragment MUST implement the {@link Callbacks}
- * interface.
+ * Activities containing this fragment MUST implement the
+ * interface to the {@link com.bdumeljic.comicbook.ProjectActivity} in order for project selection events to be handled.
  */
 public class ProjectFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     private OnFragmentInteractionListener mListener;
 
-    /**
-     * The fragment's ListView/GridView.
-     */
-    private AbsListView mListView;
+    private Random random = new Random();
 
     /**
-     * The Adapter which will be used to populate the ListView/GridView with
+     * The fragment's GridView containing the comic book projects.
+     */
+    private AbsListView mGridView;
+
+    /**
+     * The Adapter which will be used to populate the gridView with
      * Views.
      */
-    private ArrayList<ProjectModel.Project> mProjects;
     private ListAdapter mAdapter;
 
-    // TODO: Rename and change types of parameters
-    public static ProjectFragment newInstance(String param1, String param2) {
-        ProjectFragment fragment = new ProjectFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    /**
+     * List of comic book projects.
+     */
+    private ArrayList<ProjectModel.Project> mProjects;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -63,30 +55,34 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     public ProjectFragment() {
     }
 
+    /**
+     * Get the user's projects from the {@link com.bdumeljic.comicbook.Models.ProjectModel} and populate the adapter with these projects.
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mProjects = ProjectModel.PROJECTS;
-
-        // TODO: Change Adapter to display your content
-       // mAdapter = new ArrayAdapter<ProjectModel.Project>(getActivity(),
-         //       android.R.layout.simple_list_item_1, android.R.id.text1, ProjectModel.getProjects());
-
+        mProjects = ProjectModel.getProjects();
         mAdapter = new ProjectsAdapter(mProjects);
     }
 
+    /**
+     * Inflate the gridview and add an onItemClickListener to it.
+     *
+     * @return The inflated view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_project, container, false);
 
         // Set the adapter
-        mListView = (GridView) view.findViewById(R.id.projects);
-        mListView.setAdapter(mAdapter);
+        mGridView = (GridView) view.findViewById(R.id.projects);
+        mGridView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
-        //mListView.setOnItemClickListener(this);
+        mGridView.setOnItemClickListener(this);
 
         return view;
     }
@@ -111,10 +107,13 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d("PROJECT", "project clicked " + mAdapter.getItem(position).toString());
+
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(mProjects.get(position).toString());
+
+            mListener.onFragmentInteraction(mProjects.get(position));
         }
     }
 
@@ -124,7 +123,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
      * to supply the text it should use.
      */
     public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
+        View emptyView = mGridView.getEmptyView();
 
         if (emptyText instanceof TextView) {
             ((TextView) emptyView).setText(emptyText);
@@ -132,24 +131,29 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     }
 
     /**
+     * This passes on the selected projects to the activity.
+     * </p>
     * This interface must be implemented by activities that contain this
     * fragment to allow an interaction in this fragment to be communicated
     * to the activity and potentially other fragments contained in that
     * activity.
-    * <p>
-    * See the Android Training lesson <a href=
-    * "http://developer.android.com/training/basics/fragments/communicating.html"
-    * >Communicating with Other Fragments</a> for more information.
     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(ProjectModel.Project p);
     }
 
+    /**
+     * Adapter that holds all the comic book projects.
+     */
     protected class ProjectsAdapter extends BaseAdapter {
 
         private ArrayList<ProjectModel.Project> mProjects;
 
+        /**
+         * Create a new ProjectsAdapter with the provided list of projects.
+         * @param projects List of comic book projects
+         */
         public ProjectsAdapter(ArrayList<ProjectModel.Project> projects) {
             super();
             this.mProjects = projects;
@@ -170,42 +174,29 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
             return position;
         }
 
+        /**
+         * Inflate one comicbook project that goes into the gridview holding the list of projects.
+         * @param row
+         * @param convertView
+         * @param parent
+         * @return
+         */
         @Override
         public View getView(int row, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_project, parent, false);
             }
 
-            final StackView vols = (StackView) convertView.findViewById(R.id.volumes);
+            int[] card_colors = getResources().getIntArray(R.array.project_card_colors);
+            int color = card_colors[random.nextInt(card_colors.length)];
 
-            ArrayList<String> mVolNames = new ArrayList<String>();
+            CardView card = (CardView) convertView.findViewById(R.id.project_card);
+            card.setBackgroundColor(color);
 
-            for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) getItem(row).getVolumes()) {
-                if(vol.getVolName() != null) {
-                    mVolNames.add(vol.getVolName());
-                }
-            }
-
-            ArrayAdapter mVolsAdapter = new ArrayAdapter<VolumeModel.Volume>(getActivity(), R.layout.project_item, R.id.volName, (ArrayList) mVolNames);
-            vols.setAdapter(mVolsAdapter);
-            vols.setOnItemClickListener(mCardClickListener);
-
-            TextView mNameText = (TextView) convertView.findViewById(R.id.projectName);
+            TextView mNameText = (TextView) convertView.findViewById(R.id.project_name);
             mNameText.setText(mProjects.get(row).getProjectName());
 
             return convertView;
         }
     }
-
-    /*
-        TODO: Start editing activity after volume card item is clicked
-     */
-    public OnItemClickListener mCardClickListener = new OnItemClickListener() {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Toast.makeText(getActivity(), "card item clicked", Toast.LENGTH_SHORT).show();
-        }
-    };
-
 }
