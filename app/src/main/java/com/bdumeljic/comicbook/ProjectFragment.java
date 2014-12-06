@@ -191,7 +191,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
             CardView card = (CardView) convertView.findViewById(R.id.project_card);
 
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 int[] card_colors = getResources().getIntArray(R.array.project_card_colors);
                 int color = card_colors[random.nextInt(card_colors.length)];
                 card.setBackgroundColor(color);

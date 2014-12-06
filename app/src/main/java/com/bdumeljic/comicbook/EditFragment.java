@@ -2,6 +2,7 @@ package com.bdumeljic.comicbook;
 
 
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -93,7 +94,7 @@ public class EditFragment extends Fragment {
                     @Override
                     public void onSystemUiVisibilityChange(int i) {
                         int height = mDecorView.getHeight();
-                        Log.i(TAG, "Current height: " + height);
+                        Log.i(TAG, "Current height: " + height + "i " + i);
 
                         Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
@@ -101,7 +102,7 @@ public class EditFragment extends Fragment {
                             public void run() {
                                 hideSystemUI();
                             }
-                        }, 4500);
+                        }, 4000);
                     }
                 });
 
@@ -166,6 +167,15 @@ public class EditFragment extends Fragment {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                 | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            mDecorView.setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        }
 
         mEditSurfaceView.refreshDrawableState();
     }
