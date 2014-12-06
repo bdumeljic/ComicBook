@@ -2,6 +2,7 @@ package com.bdumeljic.comicbook;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import com.bdumeljic.comicbook.Models.ProjectModel;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -187,11 +189,13 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_project, parent, false);
             }
 
-            int[] card_colors = getResources().getIntArray(R.array.project_card_colors);
-            int color = card_colors[random.nextInt(card_colors.length)];
-
             CardView card = (CardView) convertView.findViewById(R.id.project_card);
-            card.setBackgroundColor(color);
+
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                int[] card_colors = getResources().getIntArray(R.array.project_card_colors);
+                int color = card_colors[random.nextInt(card_colors.length)];
+                card.setBackgroundColor(color);
+            }
 
             TextView mNameText = (TextView) convertView.findViewById(R.id.project_name);
             mNameText.setText(mProjects.get(row).getProjectName());

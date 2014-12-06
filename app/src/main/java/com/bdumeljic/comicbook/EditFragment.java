@@ -76,7 +76,7 @@ public class EditFragment extends Fragment {
             getActivity().finish();
         }
 
-        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     /**
