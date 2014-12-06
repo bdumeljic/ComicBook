@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -139,9 +140,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         private void doDraw(Canvas canvas) {
 
-   //         canvas.drawLine(mGoalX, 1 + mCanvasHeight - TARGET_PAD_HEIGHT,
-     //               mGoalX + mGoalWidth, 1 + mCanvasHeight - TARGET_PAD_HEIGHT,
-       //             mLinePaint);
+            //         canvas.drawLine(mGoalX, 1 + mCanvasHeight - TARGET_PAD_HEIGHT,
+            //               mGoalX + mGoalWidth, 1 + mCanvasHeight - TARGET_PAD_HEIGHT,
+            //             mLinePaint);
 
         }
 
@@ -177,6 +178,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     /** List of the paths drawn with blue ink on the canvas. */
     ArrayList<Path> mBluePaths = new ArrayList<Path>();
 
+    /** List of all thinngs drawn on the canvas. */
+    ArrayList<Pair<Object, String>> mDrawings = new ArrayList<Pair<Object, String>>();
+
     /**
      * List of the points of the paths drawn with black ink on the canvas.
      * Used to retrace the steps made if a valid panel has been drawn
@@ -188,7 +192,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private ArrayList<Panel> mPanels = new ArrayList<Panel>();
 
     /** List of the paths that were drawn, but have been undone. Used for the redo function. */
-    private ArrayList<Path> undonePaths = new ArrayList<Path>();
+    private ArrayList<Pair<Object, String>> mUndoneDrawings = new ArrayList<Pair<Object, String>>();
 
     /** Reference to the selected panel. */
     private Panel selectedPanel;
@@ -231,7 +235,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         visibilityBlack = false;
 
         mBluePaths.clear();
-        undonePaths.clear();
+        mUndoneDrawings.clear();
 
         mBlackPaint = new Paint();
         initPaint(mBlackPaint);
@@ -306,6 +310,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         Log.d(TAG, "switched to drawing in " + mode);
+        mUndoneDrawings.clear();
+        mDrawings.clear();
         invalidate();
     }
 
@@ -440,12 +446,12 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     /**
      * Start a touch event from the provided location.
      * </p>
-     * Reset the undone paths array when drawing is resumed.
+     * Reset the undone drawings array when drawing is resumed.
      * @param x X value of touch starting point
      * @param y Y value of touch starting point
      */
     private void touch_start(float x, float y) {
-        undonePaths.clear();
+        mUndoneDrawings.clear();
         mCurrentPath.reset();
         mCurrentPath.moveTo(x, y);
         mX = x;
@@ -480,14 +486,16 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         if (isDrawingModeBlue()) {
             mBluePaths.add(mCurrentPath);
+            mDrawings.add(new Pair(mCurrentPath, "bluePath"));
         }
 
         Log.d("", "pathsize:::" + mBluePaths.size());
-        Log.d("", "undonepathsize:::" + undonePaths.size());
+        Log.d("", "undonepathsize:::" + mUndoneDrawings.size());
 
         // Check for double tap
         if(isDrawingModeBlack()) {
             mBlackPaths.add(mCurrentPath);
+            mDrawings.add(new Pair(mCurrentPath, "blackPath"));
             mBlackPoints.add(new Point((int) mX, (int) mY));
 
             if (mBlackPoints.size() >= 4) {
@@ -510,9 +518,19 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      */
     public void onClickUndo() {
         Log.d("", "pathsize:::" + mBluePaths.size());
-        Log.d("", "undonepathsize:::" + undonePaths.size());
-        if (mBluePaths.size() > 0) {
-            undonePaths.add(mBluePaths.remove(mBluePaths.size() - 1));
+        Log.d("", "undonepathsize:::" + mUndoneDrawings.size());
+        if (mDrawings.size() > 0) {
+            if(mDrawings.get(mDrawings.size()-1).second == "bluePath"){
+                mBluePaths.remove(mBluePaths.size()-1);
+            }
+            else if(mDrawings.get(mDrawings.size()-1).second == "blackPath"){
+                mBlackPaths.remove(mBlackPaths.size()-1);
+            }
+            if(mDrawings.get(mDrawings.size()-1).second == "panel"){
+                mPanels.remove(mPanels.size()-1);
+            }
+
+            mUndoneDrawings.add(mDrawings.remove(mDrawings.size() - 1));
             invalidate();
 
             Toast.makeText(getContext(), "UNDO", Toast.LENGTH_SHORT).show();
@@ -526,9 +544,19 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      */
     public void onClickRedo() {
         Log.e("", "pathsize:::" + mBluePaths.size());
-        Log.e("", "undonepathsize:::" + undonePaths.size());
-        if (undonePaths.size() > 0) {
-            mBluePaths.add(undonePaths.remove(undonePaths.size() - 1));
+        Log.e("", "undonepathsize:::" + mUndoneDrawings.size());
+        if (mUndoneDrawings.size() > 0) {
+            if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == "bluePath"){
+                mBluePaths.add((Path) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
+            }
+            else if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == "blackPath"){
+                mBlackPaths.add((Path) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
+            }
+            else if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == "panel"){
+                mPanels.add((Panel) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
+            }
+
+            mDrawings.add(mUndoneDrawings.remove(mUndoneDrawings.size() - 1));
             invalidate();
 
             Toast.makeText(getContext(), "REDO", Toast.LENGTH_SHORT).show();
@@ -638,6 +666,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         if(width > 0 && height > 0) {
             Panel panel = new Panel(getContext(), new Point(startX, startY), (int) height, (int) width, mPanels.size());
             mPanels.add(panel);
+            mDrawings.add(new Pair(panel, "panel"));
 
             Log.d(TAG, "rect added");
             mBlackPoints.clear();
@@ -696,7 +725,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         mBlackPoints.clear();
         mPanels.clear();
 
-        undonePaths.clear();
+        mUndoneDrawings.clear();
 
         mCurrentPath = new Path();
 
