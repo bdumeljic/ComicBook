@@ -6,12 +6,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -29,7 +31,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private String TAG = "EditSurfaceView";
 
     boolean surfaceCreated;
-    private boolean isPanelDetected;
 
     /**
      * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
@@ -119,6 +120,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     EditSurfaceThread thread;
     SurfaceHolder surfaceHolder;
 
+    GestureDetector gestureDetector;
+
     private static final int BLACKPATH = 0;
     private static final int BLUEPATH = 1;
     private static final int PANEL = 2;
@@ -175,6 +178,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     public EditSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        gestureDetector = new GestureDetector(context, new GestureListener());
 
         init(context);
     }
@@ -325,6 +330,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
         int action = event.getAction();
         float x = event.getX();
         float y = event.getY();
@@ -350,26 +356,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-                // Check for a double tap used for panel selection if in BLACK drawing mode
-                if(isDrawingModeBlack()) {
-                    long time = System.currentTimeMillis() - startTime;
-                    duration = duration + time;
-                    if (clickCount == 2) {
-                        if (duration <= MAX_DURATION) {
-                            Log.d(TAG, "tap tap");
-
-                            selectedPanel = try_to_find_panel(x, y);
-                        }
-                        clickCount = 0;
-                        duration = 0;
-
-                    } else if (duration > MAX_DURATION) {
-                        clickCount = 0;
-                        duration = 0;
-
-                    }
-                }
-
                 touch_up();
                 invalidate();
                 break;
@@ -517,7 +503,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             // Draw the black panels if the black ink is visible.
             if(visibilityBlack) {
                 for (Panel panel : mPanels) {
-                    canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
+                    canvas.drawRect(panel.getDefinedRect(),  mBlackPaint);
                 }
             }
         }
@@ -525,12 +511,12 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         if (isDrawingModeBlack()) {
             // First draw all the panels.
             for (Panel panel : mPanels) {
-                canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
+                canvas.drawRect(panel.getDefinedRect(),  mBlackPaint);
             }
 
             // If a panel is selected redraw it with the selected paint.
             if (selectedPanel != null) {
-                canvas.drawRect(selectedPanel.getX(),  selectedPanel.getY(),  selectedPanel.getX() + selectedPanel.getWidth(), selectedPanel.getY() + selectedPanel.getHeight(),  mSelectedPaint);
+                canvas.drawRect(selectedPanel.getDefinedRect(),  mSelectedPaint);
                 Log.d(TAG, "there is a selected panel");
             }
 
@@ -625,29 +611,13 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * @return Panel that was found or null
      */
     public Panel try_to_find_panel(float x, float y) {
-        boolean existsX = false;
-        boolean existsY = false;
 
         Panel foundPanel = null;
 
         for (Panel panel : mPanels) {
-            if (panel.getX() < (int) x && (int) x < (panel.getX() + panel.getWidth())) {
-                Log.d(TAG, "found panel within x");
-                existsX = true;
-            }
-
-            if (panel.getY() < (int) y && (int) y < (panel.getY() + panel.getHeight())) {
-                Log.d(TAG, "found panel within y");
-                existsY = true;
-            }
-
-            if (existsX && existsY) {
-                Log.d(TAG, "found panel!");
+            if(panel.getDefinedRect().contains((int) x,(int)y)){
                 foundPanel = panel;
-            } else {
-                existsX = false;
-                existsY = false;
-            }
+            };
         }
 
         return foundPanel;
@@ -750,5 +720,22 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         } catch (InterruptedException e) {
         }
         //}
+    }
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
+        // event when double tap occurs
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            float x = e.getX();
+            float y = e.getY();
+            selectedPanel = try_to_find_panel(x,y);
+            Log.d("Double Tap", "Tapped at: (" + x + "," + y + ")");
+
+            return true;
+        }
     }
 }
