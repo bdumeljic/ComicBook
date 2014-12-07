@@ -29,6 +29,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private String TAG = "EditSurfaceView";
 
     boolean surfaceCreated;
+    private boolean isPanelDetected;
 
     /**
      * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
@@ -118,6 +119,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     EditSurfaceThread thread;
     SurfaceHolder surfaceHolder;
 
+    private static final int BLACKPATH = 0;
+    private static final int BLUEPATH = 1;
+    private static final int PANEL = 2;
+
     /** Path that is currently being drawn. */
     private Path mCurrentPath;
 
@@ -142,8 +147,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     /** List of the paths drawn with blue ink on the canvas. */
     ArrayList<Path> mBluePaths = new ArrayList<Path>();
 
-    ArrayList<Pair<Object, String>> mDrawings = new ArrayList<Pair<Object, String>>();
-    private ArrayList<Pair<Object, String>> mUndoneDrawings = new ArrayList<Pair<Object, String>>();
+    ArrayList<Pair<Object, Integer>> mDrawings = new ArrayList<Pair<Object, Integer>>();
+    private ArrayList<Pair<Object, Integer>> mUndoneDrawings = new ArrayList<Pair<Object, Integer>>();
 
     /**
      * List of the points of the paths drawn with black ink on the canvas.
@@ -420,7 +425,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         if (isDrawingModeBlue()) {
             mBluePaths.add(mCurrentPath);
-            mDrawings.add(new Pair(mCurrentPath, "bluePath"));
+            mDrawings.add(new Pair(mCurrentPath, BLUEPATH));
         }
 
         Log.d("", "pathsize:::" + mBluePaths.size());
@@ -430,10 +435,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         if(isDrawingModeBlack()) {
             mBlackPaths.add(mCurrentPath);
             mBlackPoints.add(new Point((int) mX, (int) mY));
-            mDrawings.add(new Pair(mCurrentPath, "blackPath"));
 
             if (mBlackPoints.size() >= 4) {
                 check_shape();
+                mBlackPaths.clear();
             }
 
             if (mBlackPoints.size() >= 1 && selectedPanel != null) {
@@ -454,13 +459,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.d("", "pathsize:::" + mBluePaths.size());
         Log.d("", "undonepathsize:::" + undonePaths.size());
         if (mDrawings.size() > 0) {
-            if(mDrawings.get(mDrawings.size()-1).second == "bluePath"){
+            if(mDrawings.get(mDrawings.size()-1).second == BLUEPATH){
                 mBluePaths.remove(mBluePaths.size()-1);
             }
-            else if(mDrawings.get(mDrawings.size()-1).second == "blackPath"){
-                mBlackPaths.remove(mBlackPaths.size()-1);
-            }
-            if(mDrawings.get(mDrawings.size()-1).second == "panel"){
+            if(mDrawings.get(mDrawings.size()-1).second == PANEL){
                 mPanels.remove(mPanels.size()-1);
             }
 
@@ -480,13 +482,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.e("", "pathsize:::" + mBluePaths.size());
         Log.e("", "undonepathsize:::" + undonePaths.size());
         if (mUndoneDrawings.size() > 0) {
-            if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == "bluePath"){
+            if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == BLUEPATH){
                 mBluePaths.add((Path) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
             }
-            else if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == "blackPath"){
-                mBlackPaths.add((Path) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
-            }
-            else if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == "panel"){
+            else if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == PANEL){
                 mPanels.add((Panel) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
             }
 
@@ -600,12 +599,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         if(width > 0 && height > 0) {
             Panel panel = new Panel(getContext(), new Point(startX, startY), (int) height, (int) width, mPanels.size());
             mPanels.add(panel);
-            mDrawings.add(new Pair(panel, "panel"));
-
+            mDrawings.add(new Pair(panel, PANEL));
             Log.d(TAG, "rect added");
             mBlackPoints.clear();
-            mBlackPaths.clear();
-
         } else {
             mBlackPoints.clear();
             Log.d(TAG, "points cleared");
