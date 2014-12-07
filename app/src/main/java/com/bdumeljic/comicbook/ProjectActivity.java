@@ -39,7 +39,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
         }
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.project, menu);
@@ -56,7 +56,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     /**
      * Handles the interaction that happened in the fragment that it controls.

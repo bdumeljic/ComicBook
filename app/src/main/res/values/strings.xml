@@ -21,5 +21,11 @@
     <string name="padding">Padding</string>
     <string name="no_undo">Nothing to undo</string>
     <string name="no_redo">Nothing to redo</string>
+    <string name="add_project">Add New Project</string>
+    <string name="done">Done</string>
+    <string name="new_project">New Project</string>
+    <string name="new_project_name">Project Title</string>
+    <string name="new_project_vol_name">Volume One Title</string>
+
 
 </resources>

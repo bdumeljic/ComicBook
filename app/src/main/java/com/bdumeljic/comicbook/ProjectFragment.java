@@ -1,22 +1,35 @@
 package com.bdumeljic.comicbook;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Outline;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.shamanland.fab.FloatingActionButton;
 
 import java.lang.annotation.Target;
 import java.util.ArrayList;
@@ -43,7 +56,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
      * The Adapter which will be used to populate the gridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    public ListAdapter mAdapter;
 
     /**
      * List of comic book projects.
@@ -67,6 +80,31 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
         mProjects = ProjectModel.getProjects();
         mAdapter = new ProjectsAdapter(mProjects);
+
+        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            setHasOptionsMenu(true);
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // TODO Add your menu entries here
+        inflater.inflate(R.menu.project_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_project:
+                // Do Activity menu item stuff here
+                Toast.makeText(getActivity(), R.string.hello_world, Toast.LENGTH_SHORT).show();
+                startAddProjectDialog();
+                return true;
+            default:
+                break;
+        }
+
+        return false;
     }
 
     /**
@@ -85,6 +123,18 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
         // Set OnItemClickListener so we can be notified on item clicks
         mGridView.setOnItemClickListener(this);
+
+        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            View fab = view.findViewById(R.id.fab_add_project);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Toast.makeText(getActivity(), R.string.hello_world, Toast.LENGTH_SHORT).show();
+                    startAddProjectDialog();
+                }
+            });
+        }
 
         return view;
     }
@@ -106,6 +156,35 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
         mListener = null;
     }
 
+    /**
+     * Creates a dialog where the user can make a new project.
+     */
+    public void startAddProjectDialog() {
+        View projectDialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_new_project, null);
+        final EditText projectName = (EditText) projectDialogView.findViewById(R.id.new_project_name);
+        final EditText volOneName = (EditText) projectDialogView.findViewById(R.id.new_project_vol_name);
+
+
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.new_project)
+                .setView(projectDialogView)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ProjectModel.Project project = new ProjectModel.Project(projectName.getText().toString(), volOneName.getText().toString());
+                        ProjectModel.addProject(project);
+
+                    }
+                })
+                .create();
+
+        alertDialog.show();
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

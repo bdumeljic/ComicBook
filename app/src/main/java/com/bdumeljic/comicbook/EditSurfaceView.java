@@ -84,7 +84,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                         synchronized (mRunLock) {
                             if (mRun) doDraw(canvas);
                         }
-                           
+
                     }
                 } finally {
                     // do this in a finally so that if an exception is thrown
