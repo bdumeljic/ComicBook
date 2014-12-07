@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
  *
  *  This is the launcher activity.
  */
-public class ProjectActivity extends Activity implements ProjectFragment.OnFragmentInteractionListener {
+public class ProjectActivity extends ActionBarActivity implements ProjectFragment.OnFragmentInteractionListener {
 
     public final static String PROJECT = "param_project";
     public final static String VOLUME = "param_volume";
@@ -78,6 +79,7 @@ public class ProjectActivity extends Activity implements ProjectFragment.OnFragm
 
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_volumes)
+
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // here you can add functions

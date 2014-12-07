@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,7 +17,7 @@ import com.bdumeljic.comicbook.Models.ProjectModel;
 /**
  * Activity that controls the editing process. It holds all the sliding drawer fragments used in {@link com.bdumeljic.comicbook.NavigationDrawerFragment} as well as the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
  */
-public class EditActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, PagesPresetsFragment.OnFragmentInteractionListener, PagesFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
+public class EditActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, PagesPresetsFragment.OnFragmentInteractionListener, PagesFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
 
     /**
      * Fragment managing the selection of the current page, page layout preset selection and drawing settings.
@@ -55,7 +56,6 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Get the project and volume IDs that are being edited
         Intent intent = getIntent();
@@ -68,7 +68,7 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
         }
 
         ProjectModel.Project p = ProjectModel.getProject(mProjectId);
-        getActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getVolName());
+        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getVolName());
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -88,6 +88,9 @@ public class EditActivity extends Activity implements NavigationDrawerFragment.N
         pages = PagesFragment.newInstance(mProjectId, mVolId);
         presets = new PagesPresetsFragment();
         settings = new SettingsFragment();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
 
