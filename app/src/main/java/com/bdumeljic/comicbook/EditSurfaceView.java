@@ -557,7 +557,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void check_shape() {
         /** Minimal required height/width */
         int SHAPE_THRESHOLD = 100;
-
+        int left, top;
         /** Panel width */
         float width = 0;
         /** Panel height */
@@ -569,13 +569,13 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         int startY = mBlackPoints.get(0).y;
 
         /** Vertical difference between point 1 and point 2 */
-        float diffY1 = mBlackPoints.get(1).y - mBlackPoints.get(0).y;
+        float diffY1 = Math.abs(mBlackPoints.get(1).y - mBlackPoints.get(0).y);
         /** Horizontal difference between point 1 and point 2 */
-        float diffX1 = mBlackPoints.get(1).x - mBlackPoints.get(0).x;
+        float diffX1 = Math.abs(mBlackPoints.get(1).x - mBlackPoints.get(0).x);
 
-        if (Math.abs(diffX1) > SHAPE_THRESHOLD || Math.abs(diffY1) > SHAPE_THRESHOLD) {
+        if (diffX1 > SHAPE_THRESHOLD || diffY1 > SHAPE_THRESHOLD) {
             Log.d(TAG, "proper shape detected 1");
-            if (Math.abs(diffX1) > Math.abs(diffY1) ) {
+            if (diffX1 > diffY1 ) {
                 width = diffX1;
             } else {
                 height = diffY1;
@@ -583,21 +583,28 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         /** Vertical difference between point 3 and point 4 */
-        float diffY2 = mBlackPoints.get(3).y - mBlackPoints.get(2).y;
+        float diffY2 = Math.abs(mBlackPoints.get(3).y - mBlackPoints.get(2).y);
         /** Horizontal difference between point 3 and point 4 */
-        float diffX2 = mBlackPoints.get(3).x - mBlackPoints.get(2).x;
+        float diffX2 = Math.abs(mBlackPoints.get(3).x - mBlackPoints.get(2).x);
 
         if (Math.abs(diffX2) > SHAPE_THRESHOLD || Math.abs(diffY2) > SHAPE_THRESHOLD) {
             Log.d(TAG, "proper shape detected 2");
-            if (Math.abs(diffX2) > Math.abs(diffY2) ) {
+            if (diffX2 > diffY2 ) {
                 width = diffX2;
             } else {
                 height = diffY2;
             }
         }
 
+        left = mBlackPoints.get(0).x;
+        top = mBlackPoints.get(0).y;
+
+        for (int i = 0; i < mBlackPoints.size(); i++) {
+            left = left > mBlackPoints.get(i).x ? mBlackPoints.get(i).x:left;
+            top = top > mBlackPoints.get(i).y ? mBlackPoints.get(i).y:top;
+        }
         if(width > 0 && height > 0) {
-            Panel panel = new Panel(getContext(), new Point(startX, startY), (int) height, (int) width, mPanels.size());
+            Panel panel = new Panel(getContext(), new Point(left, top), (int) height, (int) width, mPanels.size());
             mPanels.add(panel);
             mDrawings.add(new Pair(panel, PANEL));
             Log.d(TAG, "rect added");
