@@ -27,97 +27,79 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     private String TAG = "EditSurfaceView";
 
+    boolean surfaceCreated;
+
     /**
      * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
      */
     class EditSurfaceThread extends Thread {
 
         private SurfaceHolder mSurfaceHolder;
-        private Handler mHandler;
 
+        /** Variable that keeps track if the surface thread is running or not. */
         private boolean mRun = false;
         private final Object mRunLock = new Object();
-
-        private int mMode;
-
-        public static final int STATE_PAUSE = 1;
-        public static final int STATE_READY = 2;
-        public static final int STATE_RUNNING = 3;
 
         private int mCanvasHeight = 1;
         private int mCanvasWidth = 1;
 
-        public EditSurfaceThread(SurfaceHolder surfaceHolder, Context context,
-                                 Handler handler) {
+        public EditSurfaceThread(SurfaceHolder surfaceHolder, Context context) {
             // get handles to some important objects
             mSurfaceHolder = surfaceHolder;
-            mHandler = handler;
             mContext = context;
         }
 
-        public void doStart() {
-            synchronized (mSurfaceHolder) {
-                setState(STATE_RUNNING);
-            }
-        }
+        /**
+         * Change if the surface is running or not. Used to pause on resume.
+         *
+         * @param running Boolean value
+         */
+        public void setRunning(boolean running) {
+            // Do not allow mRun to be modified while any canvas operations
+            // are potentially in-flight. See doDraw().
+            if(!mRun && running) {
+                Log.d(TAG, "UNpausing .." );
 
-        public void pause() {
+            } else if(mRun && !running) {
+                Log.d(TAG, "PPPausing .." );
+            }
+
+            Log.d(TAG, "set running to .." + running);
             synchronized (mSurfaceHolder) {
-                if (mMode == STATE_RUNNING) setState(STATE_PAUSE);
+                synchronized (mRunLock) {
+                    mRun = running;
+                }
             }
         }
 
         @Override
         public void run() {
             while (mRun) {
-                Canvas c = null;
+                Canvas canvas = null;
                 try {
-                    c = mSurfaceHolder.lockCanvas(null);
+                    canvas = mSurfaceHolder.lockCanvas(null);
                     synchronized (mSurfaceHolder) {
 
                         // If mRun has been toggled false, inhibit canvas operations.
                         synchronized (mRunLock) {
-                            if (mRun) doDraw(c);
+                            if (mRun) doDraw(canvas);
                         }
+                           
                     }
                 } finally {
                     // do this in a finally so that if an exception is thrown
                     // during the above, we don't leave the Surface in an
                     // inconsistent state
-                    if (c != null) {
-                        mSurfaceHolder.unlockCanvasAndPost(c);
+                    if (canvas != null) {
+                        mSurfaceHolder.unlockCanvasAndPost(canvas);
                     }
                 }
             }
         }
 
-        public Bundle saveState(Bundle map) {
-            synchronized (mSurfaceHolder) {
+        private void doDraw(Canvas canvas) {
 
-            }
-
-            return map;
-        }
-
-        public synchronized void restoreState(Bundle savedState) {
-            synchronized (mSurfaceHolder) {
-                // put back all the mapped things from saveState
-            }
-        }
-
-        public void setRunning(boolean b) {
-            // Do not allow mRun to be modified while any canvas operations
-            // are potentially in-flight. See doDraw().
-            synchronized (mRunLock) {
-                mRun = b;
-            }
-        }
-
-        public void setState(int mode) {
-            synchronized (mSurfaceHolder) {
-                Log.d(TAG, String.valueOf(mode));
-                mMode = mode;
-            }
+             //  Log.i(TAG, "DO DRAW IN THREAD CALLED");
         }
 
         public void setSurfaceSize(int width, int height) {
@@ -128,30 +110,12 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
             }
         }
-
-        public void unpause() {
-            // Move the real time clock up to now
-            synchronized (mSurfaceHolder) {
-                //mLastTime = System.currentTimeMillis() + 100;
-            }
-            setState(STATE_RUNNING);
-        }
-
-        private void doDraw(Canvas canvas) {
-
-   //         canvas.drawLine(mGoalX, 1 + mCanvasHeight - TARGET_PAD_HEIGHT,
-     //               mGoalX + mGoalWidth, 1 + mCanvasHeight - TARGET_PAD_HEIGHT,
-       //             mLinePaint);
-
-        }
-
     }
 
     private Context mContext;
 
     EditSurfaceThread thread;
     SurfaceHolder surfaceHolder;
-    volatile boolean running = false;
 
     /** Path that is currently being drawn. */
     private Path mCurrentPath;
@@ -195,6 +159,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     public EditSurfaceView(Context context) {
         super(context);
+        surfaceCreated = true;
 
         init(context);
     }
@@ -219,12 +184,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         surfaceHolder.addCallback(this);
 
         // create thread only; it's started in surfaceCreated()
-        thread = new EditSurfaceThread(surfaceHolder, context, new Handler() {
-            @Override
-            public void handleMessage(Message m) {
-
-            }
-        });
+        thread = new EditSurfaceThread(surfaceHolder, context);
+        setFocusable(true);
 
         setDrawingMode(BLUE);
         visibilityBlue = false;
@@ -249,7 +210,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         mCurrentPath = new Path();
 
-        setFocusable(true);
     }
 
     /**
@@ -263,30 +223,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         p.setStrokeJoin(Paint.Join.ROUND);
         p.setStrokeCap(Paint.Cap.ROUND);
         p.setStrokeWidth(4);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (!hasWindowFocus) thread.pause();
-    }
-
-    public void onResumeMySurfaceView(){
-        running = true;
-        thread.doStart();
-    }
-
-    public void onPauseMySurfaceView(){
-        boolean retry = true;
-        running = false;
-        while(retry){
-            try {
-                thread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
     }
 
     /**
@@ -706,29 +642,83 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Toast.makeText(getContext(), "Page Cleared", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Used to (re)start the surface thread
+     * @param holder
+     */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        thread.setRunning(true);
-        thread.start();
+        Log.d(TAG, "surface created.." + thread.getState().toString());
+
+        if (thread.getState() == Thread.State.TERMINATED){
+            Log.d(TAG, "surface created.. terminated .. restarting");
+
+            thread = new EditSurfaceThread(getHolder(), getContext());
+            thread.setRunning(true);
+            thread.start();
+        } else {
+            Log.d(TAG, "surface created.. new ..");
+
+            thread.setRunning(true);
+           // thread.start();
+        }
     }
 
+    /**
+     * Set the height of the canvas.
+     * @param holder
+     * @param format
+     * @param width
+     * @param height
+     */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         thread.setSurfaceSize(width, height);
     }
 
+    /**
+     * Destroy the surface when the activity is destroyed.
+     * @param holder
+     */
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        boolean retry = true;
+        Log.d(TAG, "surfaceDestroyed");
+        surfaceCreated = false;
+        thread.setRunning(false);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        Log.d(TAG, "window lost focus..");
+
+        if (!hasWindowFocus) thread.setRunning(false);
+    }
+
+    /**
+     * Restart the surface after {@link com.bdumeljic.comicbook.EditFragment} has been paused.
+     */
+    public void onResumeMySurfaceView(){
+        Log.d(TAG, "resuming thread..");
+
+        surfaceCreated(getHolder());
+    }
+
+    /**
+     * Restart the surface after {@link com.bdumeljic.comicbook.EditFragment} has been paused.
+     */
+    public void onPauseMySurfaceView(){
+        Log.d(TAG, "pausing thread..");
+
+        // boolean retry = true;
         thread.setRunning(false);
 
-        while (retry) {
-            try {
-                Log.d(TAG, "trying to destroy surface");
-                thread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-            }
+        //while (retry) {
+        try {
+            Log.d(TAG, "trying to destroy surface");
+            thread.join();
+            //       retry = false;
+        } catch (InterruptedException e) {
         }
+        //}
     }
 }

@@ -76,8 +76,6 @@ public class EditFragment extends Fragment {
         if (mProject < 0 || mVolume < 0) {
             getActivity().finish();
         }
-
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     /**
@@ -94,7 +92,7 @@ public class EditFragment extends Fragment {
                     @Override
                     public void onSystemUiVisibilityChange(int i) {
                         int height = mDecorView.getHeight();
-                        Log.i(TAG, "Current height: " + height + "i " + i);
+                        Log.i(TAG, "Current height: " + height + " i " + i);
 
                         Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
@@ -116,7 +114,7 @@ public class EditFragment extends Fragment {
 
         mEditSurfaceView = (EditSurfaceView) view.findViewById(R.id.surface);
         mEditSurfaceThread = mEditSurfaceView.getThread();
-        mEditSurfaceThread.setState(EditSurfaceView.EditSurfaceThread.STATE_READY);
+        //mEditSurfaceThread.setState(EditSurfaceView.EditSurfaceThread.STATE_READY);
 
         mEditSurfaceView.refreshDrawableState();
 
@@ -190,15 +188,17 @@ public class EditFragment extends Fragment {
 
     @Override
     public void onResume() {
-        super.onResume();
-        //mEditSurfaceView.getThread().unpause();
+        Log.d(TAG, "resuming ..");
+
         mEditSurfaceView.onResumeMySurfaceView();
+        super.onResume();
     }
 
     @Override
     public void onPause() {
-        super.onPause();
-        mEditSurfaceView.getThread().pause();
+        Log.d(TAG, "pausing ..");
+
         mEditSurfaceView.onPauseMySurfaceView();
+        super.onPause();
     }
 }

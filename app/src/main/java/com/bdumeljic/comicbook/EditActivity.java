@@ -56,7 +56,6 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Get the project and volume IDs that are being edited
         Intent intent = getIntent();
@@ -89,6 +88,9 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         pages = PagesFragment.newInstance(mProjectId, mVolId);
         presets = new PagesPresetsFragment();
         settings = new SettingsFragment();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
 
