@@ -7,5 +7,8 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
     <dimen name="fab_diameter">56dp</dimen>
     <dimen name="elevation_low">3dp</dimen>
+    <dimen name="flat_button_height">36dp</dimen>
+    <dimen name="keyline_internal_padding">8dp</dimen>
+    <dimen name="button_height">14sp</dimen>
 
 </resources>

@@ -10,5 +10,18 @@
         <item name="android:padding">8dp</item>
     </style>
 
-  
+    <style name="flat_button" parent="Base.TextAppearance.AppCompat.Button">
+        <item name="android:layout_marginLeft">@dimen/keyline_internal_padding</item>
+        <item name="android:layout_marginRight">@dimen/keyline_internal_padding</item>
+        <item name="android:layout_marginEnd">@dimen/keyline_internal_padding</item>
+        <item name="android:paddingLeft">@dimen/keyline_internal_padding</item>
+        <item name="android:paddingRight">@dimen/keyline_internal_padding</item>
+        <item name="android:paddingEnd">@dimen/keyline_internal_padding</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textColor">@color/accent_lighter</item>
+        <item name="android:textColorHighlight">@android:color/white</item>
+    </style>
+
+
 </resources>

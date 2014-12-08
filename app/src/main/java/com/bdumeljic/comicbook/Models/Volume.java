@@ -5,7 +5,6 @@ import com.orm.SugarRecord;
 import java.util.ArrayList;
 
 public class Volume extends SugarRecord<Volume> {
-    private int mVolNum;
     private String mVolName;
     private ArrayList<PageModel.Page> mPages;
 
@@ -13,9 +12,8 @@ public class Volume extends SugarRecord<Volume> {
 
     }
 
-    public Volume(int num, String name) {
-        this.mVolNum = num;
-        this.mVolName = name;
+    public Volume(String title) {
+        this.mVolName = title;
         this.mPages = new ArrayList<PageModel.Page>();
 
         this.addPage();

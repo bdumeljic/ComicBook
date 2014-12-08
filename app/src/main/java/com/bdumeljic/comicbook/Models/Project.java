@@ -17,11 +17,11 @@ public class Project extends SugarRecord<Project> {
             this.id = Project.listAll(Project.class).size();
             this.title = title;
             this.mVolumes = new ArrayList<Volume>();
-            addVolume(new Volume(1, volume));
+            addVolume(new Volume(volume));
         }
 
         public String getProjectName() {
-            return title;
+            return this.title;
         }
 
         public void addVolume(Volume vol) {

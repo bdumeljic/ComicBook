@@ -155,8 +155,8 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
      */
     public void startAddProjectDialog() {
         View projectDialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_new_project, null);
-        final EditText projectName = (EditText) projectDialogView.findViewById(R.id.new_project_name);
-        final EditText volOneName = (EditText) projectDialogView.findViewById(R.id.new_project_vol_name);
+        final EditText projectTitle = (EditText) projectDialogView.findViewById(R.id.new_project_name);
+        final EditText firstVolTitle = (EditText) projectDialogView.findViewById(R.id.new_project_vol_name);
 
 
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
@@ -170,7 +170,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Project project = new Project(projectName.getText().toString(), volOneName.getText().toString());
+                        Project project = new Project(projectTitle.getText().toString(), firstVolTitle.getText().toString());
                         project.save();
 
                         mProjects.add(project);
