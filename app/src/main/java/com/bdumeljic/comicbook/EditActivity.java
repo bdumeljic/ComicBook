@@ -1,18 +1,15 @@
 package com.bdumeljic.comicbook;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.Project;
 
 /**
  * Activity that controls the editing process. It holds all the sliding drawer fragments used in {@link com.bdumeljic.comicbook.NavigationDrawerFragment} as well as the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
@@ -67,7 +64,7 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
             mVolId = extras.getInt(VOLUME);
         }
 
-        ProjectModel.Project p = ProjectModel.getProject(mProjectId);
+        Project p = Project.findById(Project.class, (long) mProjectId);
         getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getVolName());
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)

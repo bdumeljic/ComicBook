@@ -1,17 +1,14 @@
 package com.bdumeljic.comicbook;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
-import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.Project;
 import com.bdumeljic.comicbook.Models.VolumeModel;
 
 import java.util.ArrayList;
@@ -66,7 +63,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
      * @param project Selected project
      */
     @Override
-    public void onFragmentInteraction(final ProjectModel.Project project) {
+    public void onFragmentInteraction(final Project project) {
         mVolNames = new ArrayList<String>();
 
         for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) project.getVolumes()) {

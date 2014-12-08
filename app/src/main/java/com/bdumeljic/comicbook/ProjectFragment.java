@@ -3,9 +3,8 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Outline;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -18,21 +17,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.bdumeljic.comicbook.Models.ProjectModel;
-import com.shamanland.fab.FloatingActionButton;
+import com.bdumeljic.comicbook.Models.Project;
 
-import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -61,7 +59,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     /**
      * List of comic book projects.
      */
-    private ArrayList<ProjectModel.Project> mProjects;
+    public ArrayList<Project> mProjects;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -71,15 +69,15 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     }
 
     /**
-     * Get the user's projects from the {@link com.bdumeljic.comicbook.Models.ProjectModel} and populate the adapter with these projects.
+     * Get the user's projects from the {@link com.bdumeljic.comicbook.Models.Project} and populate the adapter with these projects.
      * @param savedInstanceState
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mProjects = ProjectModel.getProjects();
-        mAdapter = new ProjectsAdapter(mProjects);
+        mProjects = (ArrayList<Project>) Project.listAll(Project.class);
+        mAdapter = new ProjectsAdapter(getActivity(), R.layout.list_item_project, mProjects);
 
         if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             setHasOptionsMenu(true);
@@ -176,9 +174,11 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ProjectModel.Project project = new ProjectModel.Project(projectName.getText().toString(), volOneName.getText().toString());
-                        ProjectModel.addProject(project);
+                        Project project = new Project(projectName.getText().toString(), volOneName.getText().toString());
+                        project.save();
 
+                        mProjects.add(project);
+                        mGridView.invalidateViews();
                     }
                 })
                 .create();
@@ -221,22 +221,22 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(ProjectModel.Project p);
+        public void onFragmentInteraction(Project p);
     }
 
     /**
      * Adapter that holds all the comic book projects.
      */
-    protected class ProjectsAdapter extends BaseAdapter {
+    public class ProjectsAdapter extends ArrayAdapter {
 
-        private ArrayList<ProjectModel.Project> mProjects;
+        private ArrayList<Project> mProjects;
 
         /**
          * Create a new ProjectsAdapter with the provided list of projects.
          * @param projects List of comic book projects
          */
-        public ProjectsAdapter(ArrayList<ProjectModel.Project> projects) {
-            super();
+        public ProjectsAdapter(Context context, int resource, ArrayList<Project> projects) {
+            super(context, resource);
             this.mProjects = projects;
         }
 
@@ -246,13 +246,13 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
         }
 
         @Override
-        public ProjectModel.Project getItem(int position) {
-            return mProjects.get(position);
+        public Object getItem(int position) {
+            return position;
         }
 
         @Override
         public long getItemId(int position) {
-            return position;
+            return 0;
         }
 
         /**

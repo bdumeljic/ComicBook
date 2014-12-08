@@ -3,7 +3,6 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -11,7 +10,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bdumeljic.comicbook.Models.PageModel;
-import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.Project;
 import com.bdumeljic.comicbook.dummy.DummyContent;
 
 import java.util.ArrayList;
@@ -76,7 +75,7 @@ public class PagesFragment extends ListFragment {
             mVolume = getArguments().getInt(VOLUME, -1);
         }
 
-        ArrayList<PageModel.Page> mPages = ProjectModel.getProject(mProject).getVolume(mVolume).getPages();
+        ArrayList<PageModel.Page> mPages = Project.findById(Project.class, (long) mProject).getVolume(mVolume).getPages();
 
         mPagesAdapter = new PagesAdapter(mPages);
         setListAdapter(mPagesAdapter);
