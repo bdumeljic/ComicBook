@@ -126,6 +126,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private static final int BLUEPATH = 1;
     private static final int PANEL = 2;
 
+    private static final int MARGIN = 20;
+    private static final int DISTPANELS = 10;
+
     /** Path that is currently being drawn. */
     private Path mCurrentPath;
 
@@ -543,7 +546,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void check_shape() {
         /** Minimal required height/width */
         int SHAPE_THRESHOLD = 100;
-        int left, top;
+        int left= 0;
+        int top = 0;
         /** Panel width */
         float width = 0;
         /** Panel height */
@@ -591,6 +595,37 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
         if(width > 0 && height > 0) {
             Panel panel = new Panel(getContext(), new Point(left, top), (int) height, (int) width, mPanels.size());
+            for(Panel oldPanel : mPanels){
+
+                Rect oldPanelRect = oldPanel.getDefinedRect();
+                Rect newPanelRect = panel.getDefinedRect();
+
+                int x_overlap = Math.max(0, Math.min(oldPanelRect.right, left + newPanelRect.right) - Math.max(oldPanel.getX(),panel.getX()));
+                int y_overlap = Math.max(0, Math.min(oldPanelRect.bottom, newPanelRect.bottom) - Math.max(oldPanel.getY(), panel.getY()));
+
+                if(newPanelRect.intersects(oldPanelRect.left, oldPanelRect.top, oldPanelRect.right, oldPanelRect.bottom)) {
+                    if (newPanelRect.centerX() > oldPanelRect.centerX()) {
+                        //shift to the right side
+                        newPanelRect.left = oldPanelRect.right + DISTPANELS;
+                        break;
+                    }
+                    if (newPanelRect.centerX() < oldPanelRect.centerX()) {
+                        //shift to the left side
+                        newPanelRect.right = oldPanelRect.left - DISTPANELS;
+                        break;
+                    }
+                }
+
+
+            }
+            //check if inside border
+            if(panel.getDefinedRect().left < MARGIN){
+                panel.getDefinedRect().left = MARGIN;
+            }
+            if(panel.getDefinedRect().right > getWidth() - MARGIN){
+                panel.getDefinedRect().right = getWidth() - MARGIN;
+            }
+
             mPanels.add(panel);
             mDrawings.add(new Pair(panel, PANEL));
             Log.d(TAG, "rect added");
