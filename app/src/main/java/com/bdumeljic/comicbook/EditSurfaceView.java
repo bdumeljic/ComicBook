@@ -625,6 +625,12 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             if(panel.getDefinedRect().right > getWidth() - MARGIN){
                 panel.getDefinedRect().right = getWidth() - MARGIN;
             }
+            if(panel.getDefinedRect().top < MARGIN){
+                panel.getDefinedRect().top = MARGIN;
+            }
+            if(panel.getDefinedRect().bottom > getHeight() - MARGIN){
+                panel.getDefinedRect().bottom = getHeight() - MARGIN;
+            }
 
             mPanels.add(panel);
             mDrawings.add(new Pair(panel, PANEL));
