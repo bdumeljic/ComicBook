@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
 import com.bdumeljic.comicbook.Models.Project;
-import com.bdumeljic.comicbook.Models.VolumeModel;
+import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
 
@@ -66,7 +66,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
     public void onFragmentInteraction(final Project project) {
         mVolNames = new ArrayList<String>();
 
-        for (VolumeModel.Volume vol : (ArrayList<VolumeModel.Volume>) project.getVolumes()) {
+        for (Volume vol : (ArrayList<Volume>) project.getVolumes()) {
             if (vol.getVolName() != null) {
                 mVolNames.add(vol.getVolName());
             }

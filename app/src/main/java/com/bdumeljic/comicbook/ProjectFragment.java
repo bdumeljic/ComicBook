@@ -94,8 +94,6 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_project:
-                // Do Activity menu item stuff here
-                Toast.makeText(getActivity(), R.string.hello_world, Toast.LENGTH_SHORT).show();
                 startAddProjectDialog();
                 return true;
             default:
@@ -127,8 +125,6 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    Toast.makeText(getActivity(), R.string.hello_world, Toast.LENGTH_SHORT).show();
                     startAddProjectDialog();
                 }
             });
