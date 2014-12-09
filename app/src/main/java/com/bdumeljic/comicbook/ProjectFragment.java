@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 
 import com.bdumeljic.comicbook.Models.Project;
+import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +79,10 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
         mProjects = (ArrayList<Project>) Project.listAll(Project.class);
         mAdapter = new ProjectsAdapter(getActivity(), R.layout.list_item_project, mProjects);
+
+        Log.e("PFragment", mProjects.toString());
+        Log.e("PFragment", ((ArrayList<Volume>) Volume.listAll(Volume.class)).toString());
+
 
         if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             setHasOptionsMenu(true);
@@ -170,10 +175,12 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Project project = new Project(projectTitle.getText().toString(), firstVolTitle.getText().toString());
+                        Project project = new Project(Project.count(Project.class, null, null), projectTitle.getText().toString(), firstVolTitle.getText().toString());
                         project.save();
 
-                        mProjects.add(project);
+                        mProjects = (ArrayList<Project>) Project.listAll(Project.class);
+                        mAdapter = new ProjectsAdapter(getActivity(), R.layout.list_item_project, mProjects);
+                        mGridView.setAdapter(mAdapter);
                         mGridView.invalidateViews();
                     }
                 })
@@ -189,8 +196,11 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
+            Project project = mProjects.get(position);
+            long pid = project.getProjectId();
+            Log.d("PROJECT", "project clicked id " + pid);
 
-            mListener.onFragmentInteraction(mProjects.get(position));
+            mListener.onFragmentInteraction(pid);
         }
     }
 
@@ -217,7 +227,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Project p);
+        public void onFragmentInteraction(long p);
     }
 
     /**

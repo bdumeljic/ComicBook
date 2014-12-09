@@ -40,9 +40,9 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     SettingsFragment settings;
 
     /** Project that is currently open and being edited. */
-    public int mProjectId;
+    public long mProjectId;
     /** Volume that is currently open and being edited. */
-    public int mVolId;
+    public long mVolId;
 
     /**
      * Open the project and volume. Set the pages of the sliding drawer {@link com.bdumeljic.comicbook.PagesFragment}.
@@ -60,12 +60,12 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
 
         if (extras != null)
         {
-            mProjectId = extras.getInt(PROJECT);
-            mVolId = extras.getInt(VOLUME);
+            mProjectId = extras.getLong(PROJECT);
+            mVolId = extras.getLong(VOLUME);
         }
 
-        Project p = Project.findById(Project.class, (long) mProjectId);
-        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getVolName());
+        Project p = Project.find(Project.class, "project_id = ?", String.valueOf(mProjectId)).get(0);
+        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getTitle());
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);

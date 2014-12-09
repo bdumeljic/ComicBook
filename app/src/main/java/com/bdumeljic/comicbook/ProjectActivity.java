@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -17,6 +18,7 @@ import com.bdumeljic.comicbook.Models.Project;
 import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
+
 
 /**
  *  Activity that controls the selection of projects and volumes.
@@ -49,17 +51,27 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
      *
      * This is called when a project has been selected. This opens a dialog that enables the user to choose a volume to edit. After a volume has been selected, this starts the edit activity.
      *
-     * @param project Selected project
+     * @param projectId Selected project id
      */
     @Override
-    public void onFragmentInteraction(final Project project) {
+    public void onFragmentInteraction(long projectId) {
         mVolNames = new ArrayList<String>();
 
-        mVolNames.add("fkfkf");
-        mVolNames.add("fsgg");
-        for (Volume vol : (ArrayList<Volume>) project.getVolumes()) {
-            if (vol.getVolName() != null) {
-                mVolNames.add(vol.getVolName());
+        final Project project = Project.find(Project.class, "project_id = ?", String.valueOf(projectId)).get(0);
+
+
+
+        Log.e("PA", "p id provided " + String.valueOf(projectId) );
+        Log.e("PA", " p id " + String.valueOf(project.getProjectId()));
+        Log.e("PA", " volumes found " + project.getVolumes().size() );
+        Log.e("PA p", "trying to get volumes for project: " + project.toString());
+
+        for (Volume vol : project.getVolumes()) {
+            Log.e("PA loop", vol.toString() + " p " + vol.getProjectId() + " id " + vol.getId() + " t " + vol.getTitle());
+
+            if (vol.getTitle() != null) {
+                mVolNames.add(vol.getTitle());
+
             }
         }
 
@@ -77,7 +89,9 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                 volumeDialogView.findViewById(R.id.add_new_volume_button).setVisibility(View.VISIBLE);
                 newVol.setVisibility(View.GONE);
 
-                mVolNames.add(newVolTitle.getText().toString());
+                String title = newVolTitle.getText().toString();
+                mVolNames.add(title);
+                project.addVolume(title);
                 newVolTitle.getText().clear();
                 alertDialog.getListView().setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, mVolNames));
             }
@@ -95,11 +109,6 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
             }
         });
 
-        showVolumeDialog(project, volumeDialogView);
-
-    }
-
-    public void showVolumeDialog(final Project project, View view) {
         alertDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_volumes)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -113,16 +122,17 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                         // The 'which' argument contains the index position
                         // of the selected item
 
+                        Volume vol = Volume.find(Volume.class, "title = ?", mVolNames.get(which)).get(0);
                         Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
                         editIntent.putExtra(PROJECT, project.getProjectId());
-                        editIntent.putExtra(VOLUME, which);
+                        editIntent.putExtra(VOLUME, vol.getVolId());
                         startActivity(editIntent);
                     }
                 })
-                .setView(view)
+                .setView(volumeDialogView)
                 .create();
 
         alertDialog.show();
-    }
 
+    }
 }

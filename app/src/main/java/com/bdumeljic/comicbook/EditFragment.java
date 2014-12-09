@@ -27,9 +27,9 @@ public class EditFragment extends Fragment {
     public final static String VOLUME = "param_volume";
 
     /** Project being edited */
-    private int mProject;
+    private long mProject;
     /** Volume being edited */
-    private int mVolume;
+    private long mVolume;
 
     /** View that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} */
     private View mDecorView;
@@ -52,11 +52,11 @@ public class EditFragment extends Fragment {
      * @return A new instance of fragment EditFragment in which a volume of a comic book series can be edited.
      */
     // TODO: Rename and change types and number of parameters
-    public static EditFragment newInstance(int param1, int param2) {
+    public static EditFragment newInstance(long param1, long param2) {
         EditFragment fragment = new EditFragment();
         Bundle args = new Bundle();
-        args.putInt(PROJECT, param1);
-        args.putInt(VOLUME, param2);
+        args.putLong(PROJECT, param1);
+        args.putLong(VOLUME, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -69,8 +69,8 @@ public class EditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mProject = getArguments().getInt(PROJECT, -1);
-            mVolume = getArguments().getInt(VOLUME, -1);
+            mProject = getArguments().getLong(PROJECT, -1);
+            mVolume = getArguments().getLong(VOLUME, -1);
         }
 
         if (mProject < 0 || mVolume < 0) {

@@ -31,8 +31,8 @@ public class PagesFragment extends ListFragment {
     public final static String PROJECT = "param_project";
     public final static String VOLUME = "param_volume";
 
-    private int mProject;
-    private int mVolume;
+    private long mProject;
+    private long mVolume;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,11 +46,11 @@ public class PagesFragment extends ListFragment {
      * @param volume Volume id
      * @return Fragment with a list populated by the pages of the provided project and volume.
      */
-     public static PagesFragment newInstance(int project, int volume) {
+     public static PagesFragment newInstance(long project, long volume) {
         PagesFragment fragment = new PagesFragment();
         Bundle args = new Bundle();
-        args.putInt(PROJECT, project);
-        args.putInt(VOLUME, volume);
+        args.putLong(PROJECT, project);
+        args.putLong(VOLUME, volume);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,14 +71,14 @@ public class PagesFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mProject = getArguments().getInt(PROJECT, -1);
-            mVolume = getArguments().getInt(VOLUME, -1);
+            mProject = getArguments().getLong(PROJECT, -1);
+            mVolume = getArguments().getLong(VOLUME, -1);
         }
 
-        ArrayList<PageModel.Page> mPages = Project.findById(Project.class, (long) mProject).getVolume(mVolume).getPages();
+        /*ArrayList<PageModel.Page> mPages = Project.findById(Project.class, mProject).getVolume(mVolume).getPages();
 
         mPagesAdapter = new PagesAdapter(mPages);
-        setListAdapter(mPagesAdapter);
+        setListAdapter(mPagesAdapter);*/
     }
 
 
