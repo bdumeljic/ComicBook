@@ -51,22 +51,4 @@
         class="com.bdumeljic.comicbook.EditSurfaceView"/>
 
     </android.support.v7.widget.CardView>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Undo"
-        android:id="@+id/undoBtn"
-        android:layout_below="@+id/button_black"
-        android:layout_alignEnd="@+id/button_black" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Redo"
-        android:id="@+id/redoBtn"
-        android:layout_below="@+id/undoBtn"
-        android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/undoBtn" />
-
 </RelativeLayout>
