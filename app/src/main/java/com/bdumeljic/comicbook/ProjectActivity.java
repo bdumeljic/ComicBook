@@ -121,7 +121,6 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                     public void onClick(DialogInterface dialog, int which) {
                         // The 'which' argument contains the index position
                         // of the selected item
-
                         Volume vol = Volume.find(Volume.class, "title = ?", mVolNames.get(which)).get(0);
                         Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
                         editIntent.putExtra(PROJECT, project.getProjectId());

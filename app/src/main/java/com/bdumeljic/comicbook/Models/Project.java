@@ -28,7 +28,7 @@ public class Project extends SugarRecord<Project> {
         }
 
         public void addVolume(String title) {
-            long vid = Volume.count(Volume.class, null, null);
+            long vid = Volume.count(Volume.class, "project_id = ?", new String[]{String.valueOf(projectId)});
             Volume volume = new Volume(vid, title, projectId);
             volume.save();
 
