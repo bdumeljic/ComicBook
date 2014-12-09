@@ -7,9 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -33,6 +30,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private String TAG = "EditSurfaceView";
 
     boolean surfaceCreated;
+    private int prevX;
+    private int prevY;
+    private boolean isPanelSelected = false;
+    private int mTouchSlop = -1;
 
     /**
      * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
@@ -332,24 +333,27 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //double tap check
         gestureDetector.onTouchEvent(event);
+        if(!isPanelSelected){
+            drawPath(event);
+        }
+        else{
+            onDragMovePanel(event);
+
+        }
+        return super.onTouchEvent(event);
+    }
+
+    private boolean drawPath(MotionEvent event) {
         int action = event.getAction();
         float x = event.getX();
         float y = event.getY();
 
-        Log.d(TAG, event.toString());
-
         switch(action) {
             case MotionEvent.ACTION_DOWN:
-                // Start check for a double tap if in BLACK mode
-                if(isDrawingModeBlack()) {
-                    startTime = System.currentTimeMillis();
-                    clickCount++;
-                }
-
                 // Start a draw event
                 touch_start(x, y);
-
                 // Redraw the view
                 invalidate();
                 break;
@@ -359,6 +363,57 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 break;
             case MotionEvent.ACTION_UP:
                 touch_up();
+                invalidate();
+                break;
+        }
+
+        return true;
+    }
+
+    private boolean onDragMovePanel(MotionEvent event) {
+        int positionX = (int) event.getX();
+        int positionY = (int) event.getY();
+
+
+        switch (event.getAction()) {
+
+            case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on
+                if(selectedPanel.getDefinedRect().contains(positionX, positionY)) {
+                    // Remember where we started (for dragging)
+                    prevX = positionX;
+                    prevY = positionY;
+                }
+                else{
+                    //Deselection of Panel
+                    selectedPanel = null;
+                    mBlackPoints.clear();
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int deltaX = positionX - prevX;
+                int deltaY = positionY - prevY;
+
+                int mScreenWidth  = this.getWidth();
+                int mScreenHeight  = this.getHeight();
+                // Check if we have moved far enough that it looks more like a
+                // scroll than a tap
+                if (selectedPanel != null && (deltaX > mTouchSlop || deltaY > mTouchSlop)) {
+                    // Check if delta is added, is the rectangle is within the visible screen
+                    if((selectedPanel.getDefinedRect().left+ deltaX) > MARGIN && ((selectedPanel.getDefinedRect().right +deltaX) < mScreenWidth - MARGIN )  && ((selectedPanel.getDefinedRect().top +deltaY > MARGIN ) && (selectedPanel.getDefinedRect().bottom+deltaY < mScreenHeight - MARGIN))){
+                        // invalidate current position as we are moving...
+                        selectedPanel.getDefinedRect().offset(deltaX, deltaY);
+                        invalidate();
+                        prevX = positionX;
+                        prevY = positionY;
+
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if(selectedPanel == null){
+                    isPanelSelected = false;
+                }
+                mBlackPoints.clear();
                 invalidate();
                 break;
         }
@@ -378,6 +433,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * @param y Y value of touch starting point
      */
     private void touch_start(float x, float y) {
+        Log.d("START DRAWING", "drawing line");
         undonePaths.clear();
         mCurrentPath.reset();
         mCurrentPath.moveTo(x, y);
@@ -385,7 +441,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         mY = y;
 
         // Add this new point to the black points array if BLACK mode is on
-        if(isDrawingModeBlack()) {
+        if(isDrawingModeBlack() && !isPanelSelected) {
             mBlackPoints.add(new Point((int) x, (int) y));
         }
     }
@@ -406,7 +462,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     }
 
     /**
-     * Handle the end of a touch or draw. Check if this was a double tap for panel selection or the drawing of a line.
+     * Handle the end of a touch or draw.
      */
     private void touch_up() {
         mCurrentPath.lineTo(mX, mY);
@@ -427,11 +483,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             if (mBlackPoints.size() >= 4) {
                 check_shape();
                 mBlackPaths.clear();
-            }
-
-            if (mBlackPoints.size() >= 1 && selectedPanel != null) {
-                selectedPanel = null;
-                Log.d(TAG, "panel deselected");
             }
 
         }
@@ -598,9 +649,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 Rect oldPanelRect = oldPanel.getDefinedRect();
                 Rect newPanelRect = panel.getDefinedRect();
 
-                int x_overlap = Math.max(0, Math.min(oldPanelRect.right, left + newPanelRect.right) - Math.max(oldPanel.getX(),panel.getX()));
-                int y_overlap = Math.max(0, Math.min(oldPanelRect.bottom, newPanelRect.bottom) - Math.max(oldPanel.getY(), panel.getY()));
-
                 if(newPanelRect.intersects(oldPanelRect.left, oldPanelRect.top, oldPanelRect.right, oldPanelRect.bottom)) {
                     if (newPanelRect.centerX() > oldPanelRect.centerX()) {
                         //shift to the right side
@@ -761,17 +809,13 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         //}
     }
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return true;
-        }
         // event when double tap occurs
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             float x = e.getX();
             float y = e.getY();
             selectedPanel = try_to_find_panel(x,y);
+            isPanelSelected = true;
             Log.d("Double Tap", "Tapped at: (" + x + "," + y + ")");
 
             return true;
