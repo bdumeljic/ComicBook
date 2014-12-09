@@ -7,10 +7,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.bdumeljic.comicbook.Models.Page;
+import com.bdumeljic.comicbook.Models.Project;
+import com.bdumeljic.comicbook.Models.Volume;
 
 
 /**
@@ -27,9 +31,12 @@ public class EditFragment extends Fragment {
     public final static String VOLUME = "param_volume";
 
     /** Project being edited */
-    private long mProject;
+    private long mProjectId;
     /** Volume being edited */
-    private long mVolume;
+    private long mVolumeId;
+
+    public Volume volume;
+    public Page currentPage;
 
     /** View that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} */
     private View mDecorView;
@@ -69,13 +76,16 @@ public class EditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mProject = getArguments().getLong(PROJECT, -1);
-            mVolume = getArguments().getLong(VOLUME, -1);
+            mProjectId = getArguments().getLong(PROJECT, -1);
+            mVolumeId = getArguments().getLong(VOLUME, -1);
         }
 
-        if (mProject < 0 || mVolume < 0) {
+        if (mProjectId < 0 || mVolumeId < 0) {
             getActivity().finish();
         }
+
+        volume = Project.findProject(mProjectId).getVolume(mVolumeId);
+        currentPage = volume.getPage(1);
     }
 
     /**
@@ -114,7 +124,6 @@ public class EditFragment extends Fragment {
 
         mEditSurfaceView = (EditSurfaceView) view.findViewById(R.id.surface);
         mEditSurfaceThread = mEditSurfaceView.getThread();
-        //mEditSurfaceThread.setState(EditSurfaceView.EditSurfaceThread.STATE_READY);
 
         mEditSurfaceView.refreshDrawableState();
 
@@ -152,6 +161,9 @@ public class EditFragment extends Fragment {
                 mEditSurfaceView.setDrawingMode(BLACK);
             }
         });
+
+        currentPage = volume.getPage(1);
+        currentPage.loadPage();
 
         return view;
     }
@@ -200,5 +212,21 @@ public class EditFragment extends Fragment {
 
         mEditSurfaceView.onPauseMySurfaceView();
         super.onPause();
+    }
+
+    public void changePage(long num) {
+        currentPage = volume.getPage(num);
+        currentPage.loadPage();
+        mEditSurfaceView.setBluePaths(currentPage.getBlueLines());
+        mEditSurfaceView.setPanels(currentPage.getPanels());
+
+        Toast.makeText(getActivity(), "changed page", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void savePage() {
+        Log.e(TAG, mEditSurfaceView.mBluePaths.toString());
+        currentPage.savePage(mEditSurfaceView.mPanels, mEditSurfaceView.mBluePaths);
+        Toast.makeText(getActivity(), "Saved page", Toast.LENGTH_SHORT).show();
     }
 }

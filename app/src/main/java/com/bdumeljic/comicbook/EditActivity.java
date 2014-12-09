@@ -31,6 +31,8 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     public static final int BLUE = 0;
     public static final int BLACK = 1;
     public static final int CLEAR = 2;
+    public static final int SAVE = 3;
+
 
     /** Fragment used for switching between volume pages. */
     PagesFragment pages;
@@ -52,7 +54,6 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
-
 
         // Get the project and volume IDs that are being edited
         Intent intent = getIntent();
@@ -156,9 +157,14 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         //Toast.makeText(getBaseContext(), "Navigation item selected, number: " + String.valueOf(position), Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Called upon interaction with pages fragment.
+     * @param num
+     */
     @Override
-    public void onFragmentInteraction(String id) {
-
+    public void onFragmentInteraction(long num) {
+        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
+        editFragment.changePage(num);
     }
 
     /**
@@ -181,8 +187,16 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
             case CLEAR:
                 editFragment.getSurfaceView().clearPage();
                 break;
+            case SAVE:
+                editFragment.savePage();
+                break;
         }
 
+
+    }
+
+    @Override
+    public void onFragmentInteraction(String id) {
 
     }
 }

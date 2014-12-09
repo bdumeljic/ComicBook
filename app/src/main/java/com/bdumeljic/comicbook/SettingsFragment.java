@@ -34,6 +34,7 @@ public class SettingsFragment extends Fragment {
     public static final int BLUE = 0;
     public static final int BLACK = 1;
     public static final int CLEAR = 2;
+    public static final int SAVE = 3;
 
     /** Used to toggle the visibility of blue ink. */
     public Switch mBlueToggle;
@@ -75,6 +76,16 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 if (mListener != null) {
                     mListener.onFragmentInteraction(CLEAR, false);
+                }
+            }
+        });
+
+        Button mSaveButton = (Button) view.findViewById(R.id.save);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    mListener.onFragmentInteraction(SAVE, false);
                 }
             }
         });

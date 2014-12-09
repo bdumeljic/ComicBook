@@ -149,7 +149,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     /** List of the paths drawn with black ink on the canvas. */
     ArrayList<Path> mBlackPaths = new ArrayList<Path>();
     /** List of the panels drawn on the canvas. */
-    private ArrayList<Panel> mPanels = new ArrayList<Panel>();
+    ArrayList<Panel> mPanels = new ArrayList<Panel>();
 
     /** List of the paths that were drawn, but have been undone. Used for the redo function. */
     private ArrayList<Path> undonePaths = new ArrayList<Path>();
@@ -320,7 +320,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         float x = event.getX();
         float y = event.getY();
 
-        Log.d(TAG, event.toString());
+        //Log.d(TAG, event.toString());
 
         switch(action) {
             case MotionEvent.ACTION_DOWN:
@@ -709,16 +709,32 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void onPauseMySurfaceView(){
         Log.d(TAG, "pausing thread..");
 
-        // boolean retry = true;
         thread.setRunning(false);
 
-        //while (retry) {
         try {
             Log.d(TAG, "trying to destroy surface");
             thread.join();
             //       retry = false;
         } catch (InterruptedException e) {
         }
-        //}
+    }
+
+    public void setBluePaths(ArrayList<Path> blueLines) {
+        mBluePaths.clear();
+        if (blueLines != null && !blueLines.isEmpty()) {
+            for (Path line : blueLines) {
+                mBluePaths.add(line);
+            }
+        }
+        invalidate();
+    }
+
+    public void setPanels(ArrayList<Panel> panels) {
+        mPanels.clear();
+        if (panels != null && !panels.isEmpty()) {
+            for (Panel p : panels) {
+                mPanels.add(p);
+            }        }
+        invalidate();
     }
 }

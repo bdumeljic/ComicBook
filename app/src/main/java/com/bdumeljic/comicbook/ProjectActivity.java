@@ -124,7 +124,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                         Volume vol = Volume.find(Volume.class, "title = ?", mVolNames.get(which)).get(0);
                         Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
                         editIntent.putExtra(PROJECT, project.getProjectId());
-                        editIntent.putExtra(VOLUME, vol.getVolId());
+                        editIntent.putExtra(VOLUME, vol.getVolumeId());
                         startActivity(editIntent);
                     }
                 })
