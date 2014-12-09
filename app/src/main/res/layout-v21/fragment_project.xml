@@ -18,6 +18,14 @@
         android:padding="16dp"
         android:numColumns="4"/>
 
+    <com.shamanland.fab.FloatingActionButton
+        android:id="@+id/fab_add_project"
+        app:floatingActionButtonColor="@color/accent"
+        app:floatingActionButtonSize="normal"
+        android:src="@android:drawable/ic_input_add"
+
+        style="@style/fab" />
+
     <TextView
         android:id="@android:id/empty"
         android:layout_width="match_parent"

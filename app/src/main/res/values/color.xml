@@ -3,6 +3,9 @@
     <color name="primary">#607d8b</color>
     <color name="primary_dark">#455a64</color>
     <color name="primary_darkest">#263238</color>
+    <color name="accent">@color/pink</color>
+    <color name="accent_lighter">@color/pink_lighter</color>
+    <color name="pink_lighter">#F06292</color>
     <color name="pink">#e91e63</color>
     <color name="pink_alpha">#50e91e63</color>
     <color name="cards">#78909c</color>

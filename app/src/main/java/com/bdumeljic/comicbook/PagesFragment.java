@@ -3,15 +3,16 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.bdumeljic.comicbook.Models.PageModel;
-import com.bdumeljic.comicbook.Models.ProjectModel;
+import com.bdumeljic.comicbook.Models.Page;
+import com.bdumeljic.comicbook.Models.Project;
+import com.bdumeljic.comicbook.Models.Volume;
 import com.bdumeljic.comicbook.dummy.DummyContent;
 
 import java.util.ArrayList;
@@ -32,8 +33,8 @@ public class PagesFragment extends ListFragment {
     public final static String PROJECT = "param_project";
     public final static String VOLUME = "param_volume";
 
-    private int mProject;
-    private int mVolume;
+    private long mProject;
+    private long mVolume;
 
     private OnFragmentInteractionListener mListener;
 
@@ -47,11 +48,11 @@ public class PagesFragment extends ListFragment {
      * @param volume Volume id
      * @return Fragment with a list populated by the pages of the provided project and volume.
      */
-     public static PagesFragment newInstance(int project, int volume) {
+     public static PagesFragment newInstance(long project, long volume) {
         PagesFragment fragment = new PagesFragment();
         Bundle args = new Bundle();
-        args.putInt(PROJECT, project);
-        args.putInt(VOLUME, volume);
+        args.putLong(PROJECT, project);
+        args.putLong(VOLUME, volume);
         fragment.setArguments(args);
         return fragment;
     }
@@ -72,16 +73,22 @@ public class PagesFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mProject = getArguments().getInt(PROJECT, -1);
-            mVolume = getArguments().getInt(VOLUME, -1);
+            mProject = getArguments().getLong(PROJECT, -1);
+            mVolume = getArguments().getLong(VOLUME, -1);
         }
 
-        ArrayList<PageModel.Page> mPages = ProjectModel.getProject(mProject).getVolume(mVolume).getPages();
+        ArrayList<Page> mPages = (ArrayList<Page>) Project.findProject(mProject).getVolume(mVolume).getPages();
 
         mPagesAdapter = new PagesAdapter(mPages);
         setListAdapter(mPagesAdapter);
+
     }
 
+    @Override
+    public void onStart() {
+        setSelection(0);
+        super.onStart();
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -108,7 +115,9 @@ public class PagesFragment extends ListFragment {
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            long number = mPagesAdapter.getItem(position).getNumber();
+
+            mListener.onFragmentInteraction(number);
         }
     }
 
@@ -124,7 +133,7 @@ public class PagesFragment extends ListFragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(long id);
     }
 
     /**
@@ -132,13 +141,13 @@ public class PagesFragment extends ListFragment {
      */
     protected class PagesAdapter extends BaseAdapter {
 
-        private ArrayList<PageModel.Page> mPages;
+        private ArrayList<Page> mPages;
 
         /**
          * Create a new PagesAdapter with the provided list of pages.
          * @param pages List of pages
          */
-        public PagesAdapter(ArrayList<PageModel.Page> pages) {
+        public PagesAdapter(ArrayList<Page> pages) {
             super();
             this.mPages = pages;
         }
@@ -149,7 +158,7 @@ public class PagesFragment extends ListFragment {
         }
 
         @Override
-        public PageModel.Page getItem(int position) {
+        public Page getItem(int position) {
             return mPages.get(position);
         }
 
@@ -168,7 +177,7 @@ public class PagesFragment extends ListFragment {
             //card.setBackgroundColor(color);
 
             TextView mNumText = (TextView) convertView.findViewById(R.id.page_num);
-            mNumText.setText(String.valueOf(row + 1));
+            mNumText.setText(String.valueOf(mPages.get(row).getNumber()));
 
             return convertView;
         }
