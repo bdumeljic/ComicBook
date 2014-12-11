@@ -1,6 +1,8 @@
 package com.bdumeljic.comicbook;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,6 +18,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.bdumeljic.comicbook.Models.Handle;
 import com.bdumeljic.comicbook.Models.Panel;
 
 import java.util.ArrayList;
@@ -28,12 +31,19 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private static final int MARGIN = 20;
     private static final int DISTPANELS = 10;
     private String TAG = "EditSurfaceView";
+    private Rect lastNotIntersecting;
 
     boolean surfaceCreated;
     private int prevX;
     private int prevY;
     private boolean isPanelSelected = false;
     private int mTouchSlop = -1;
+
+    private ArrayList<Handle> resizeHandles;
+    int groupId = -1;
+    private int handleId = -1;
+    private boolean isHandleTouched;
+    // variable to know what ball is being dragged
 
     /**
      * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
@@ -316,16 +326,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         invalidate();
         Log.d(TAG, "toggle black to  " + String.valueOf(visibilityBlack));
     }
-
-    /** Variable for counting two successive up-down events for the selection of panels. */
-    int clickCount = 0;
-    /** Variable for storing the time of first click. */
-    long startTime;
-    /** Variable for calculating the total time */
-    long duration;
-    /** Constant for defining the time duration between the click that can be considered as double-tap. */
-    static final int MAX_DURATION = 500;
-
     /**
      * Handle all the touch events on the canvas, e.g. drawing and selecting panels.
      * @param event
@@ -335,14 +335,15 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public boolean onTouchEvent(MotionEvent event) {
         //double tap check
         gestureDetector.onTouchEvent(event);
+        Log.d("DRAWING", "Panel not selected? " + isPanelSelected);
+
         if(!isPanelSelected){
             drawPath(event);
         }
-        else{
+        else if(isPanelSelected){
             onDragMovePanel(event);
-
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
     private boolean drawPath(MotionEvent event) {
@@ -378,16 +379,17 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         switch (event.getAction()) {
 
             case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on
-                if(selectedPanel.getDefinedRect().contains(positionX, positionY)) {
-                    // Remember where we started (for dragging)
-                    prevX = positionX;
-                    prevY = positionY;
+                if(!isHandleTouched){
+                    detectTouchedHandle(positionX, positionY);
                 }
-                else{
+                if(handleId == -1 && !(selectedPanel.getDefinedRect().contains(positionX, positionY))) {
                     //Deselection of Panel
+                    Log.d("DESELECTION", "Deselection");
                     selectedPanel = null;
-                    mBlackPoints.clear();
                 }
+                // Remember where we started (for dragging)
+                prevX = positionX;
+                prevY = positionY;
                 break;
             case MotionEvent.ACTION_MOVE:
                 int deltaX = positionX - prevX;
@@ -399,25 +401,42 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 // scroll than a tap
                 if (selectedPanel != null && (deltaX > mTouchSlop || deltaY > mTouchSlop)) {
                     // Check if delta is added, is the rectangle is within the visible screen
-                    if((selectedPanel.getDefinedRect().left+ deltaX) > MARGIN && ((selectedPanel.getDefinedRect().right +deltaX) < mScreenWidth - MARGIN )  && ((selectedPanel.getDefinedRect().top +deltaY > MARGIN ) && (selectedPanel.getDefinedRect().bottom+deltaY < mScreenHeight - MARGIN))){
-                        // invalidate current position as we are moving...
-                        selectedPanel.getDefinedRect().offset(deltaX, deltaY);
-                        invalidate();
-                        prevX = positionX;
-                        prevY = positionY;
+                    if (handleId > -1) {
+                        // move the balls the same as the finger
 
+                        if ( positionX > MARGIN && positionX < this.getWidth() - MARGIN && positionY > MARGIN && positionY < this.getHeight() - MARGIN) {
+                            resizeHandles.get(handleId).setX(positionX);
+                            resizeHandles.get(handleId).setY(positionY);
+                            if (groupId == 1) {
+                                //
+                                resizeHandles.get(1).setX(resizeHandles.get(0).getX());
+                                resizeHandles.get(1).setY(resizeHandles.get(2).getY());
+                                resizeHandles.get(3).setX(resizeHandles.get(2).getX());
+                                resizeHandles.get(3).setY(resizeHandles.get(0).getY());
+                            } else {
+                                resizeHandles.get(0).setX(resizeHandles.get(1).getX());
+                                resizeHandles.get(0).setY(resizeHandles.get(3).getY());
+                                resizeHandles.get(2).setX(resizeHandles.get(3).getX());
+                                resizeHandles.get(2).setY(resizeHandles.get(1).getY());
+                            }
+                            computeResizedRect(positionX, positionY);
+                        }
+                    }else if((selectedPanel.getDefinedRect().left+ deltaX) > MARGIN && ((selectedPanel.getDefinedRect().right +deltaX) < mScreenWidth - MARGIN )  && ((selectedPanel.getDefinedRect().top +deltaY > MARGIN ) && (selectedPanel.getDefinedRect().bottom+deltaY < mScreenHeight - MARGIN))) {
+                        selectedPanel.getDefinedRect().offset(deltaX, deltaY);
+                        setHandlesToRectBounds(selectedPanel.getDefinedRect());
                     }
                 }
+                prevX = positionX;
+                prevY = positionY;
+                invalidate();
                 break;
             case MotionEvent.ACTION_UP:
                 if(selectedPanel == null){
                     isPanelSelected = false;
                 }
-                mBlackPoints.clear();
                 invalidate();
                 break;
         }
-
         return true;
     }
 
@@ -433,7 +452,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * @param y Y value of touch starting point
      */
     private void touch_start(float x, float y) {
-        Log.d("START DRAWING", "drawing line");
         undonePaths.clear();
         mCurrentPath.reset();
         mCurrentPath.moveTo(x, y);
@@ -441,7 +459,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         mY = y;
 
         // Add this new point to the black points array if BLACK mode is on
-        if(isDrawingModeBlack() && !isPanelSelected) {
+        if(isDrawingModeBlack()) {
             mBlackPoints.add(new Point((int) x, (int) y));
         }
     }
@@ -472,9 +490,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             mDrawings.add(new Pair(mCurrentPath, BLUEPATH));
         }
 
-        Log.d("", "pathsize:::" + mBluePaths.size());
-        Log.d("", "undonepathsize:::" + undonePaths.size());
-
         // Check for double tap
         if(isDrawingModeBlack()) {
             mBlackPaths.add(mCurrentPath);
@@ -495,8 +510,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * Undo the previous drawing action. Inform the user of this action.
      */
     public void onClickUndo() {
-        Log.d("", "pathsize:::" + mBluePaths.size());
-        Log.d("", "undonepathsize:::" + undonePaths.size());
         if (mDrawings.size() > 0) {
             if(mDrawings.get(mDrawings.size()-1).second == BLUEPATH){
                 mBluePaths.remove(mBluePaths.size()-1);
@@ -518,8 +531,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * Redo a drawing action that has been undone. Inform the user of this action.
      */
     public void onClickRedo() {
-        Log.e("", "pathsize:::" + mBluePaths.size());
-        Log.e("", "undonepathsize:::" + undonePaths.size());
         if (mUndoneDrawings.size() > 0) {
             if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == BLUEPATH){
                 mBluePaths.add((Path) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
@@ -570,6 +581,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             // If a panel is selected redraw it with the selected paint.
             if (selectedPanel != null) {
                 canvas.drawRect(selectedPanel.getDefinedRect(),  mSelectedPaint);
+                for(Handle ball : resizeHandles){
+                    canvas.drawBitmap(ball.getBitmap(),ball.getX(),ball.getY(), mSelectedPaint);
+                }
                 Log.d(TAG, "there is a selected panel");
             }
 
@@ -684,8 +698,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             mBlackPoints.clear();
         } else {
             mBlackPoints.clear();
-            Log.d(TAG, "points cleared");
-
         }
     }
 
@@ -824,6 +836,127 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             }        }
         invalidate();
     }
+
+    /**
+     * computation of new defined rect after resizing
+     * @param touchX    x coordinate of usertouch
+     * @param touchY    y coordinate of usertouch
+     */
+    private void computeResizedRect(int touchX, int touchY) {
+        int left, top, right, bottom;
+
+        int mScreenWidth = this.getWidth();
+        int mScreenHeight = this.getHeight();
+
+        left = resizeHandles.get(0).getX();
+        top = resizeHandles.get(0).getY();
+        right = resizeHandles.get(0).getX();
+        bottom = resizeHandles.get(0).getY();
+
+        for (int i = 1; i < resizeHandles.size(); i++) {
+            left = left > resizeHandles.get(i).getX() ? resizeHandles.get(i).getX():left;
+            top = top > resizeHandles.get(i).getY() ? resizeHandles.get(i).getY():top;
+            right = right < resizeHandles.get(i).getX() ? resizeHandles.get(i).getX():right;
+            bottom = bottom < resizeHandles.get(i).getY() ? resizeHandles.get(i).getY():bottom;
+        }
+        // Check if rectangle is within the visible screen
+        if (((left > MARGIN ) && (right < mScreenWidth - MARGIN) && ((top > MARGIN) && (bottom  < mScreenHeight - MARGIN)))) {
+            // invalidate current position as we are moving...
+            Rect resizedRect = new Rect(
+                    left + resizeHandles.get(0).getWidthOfBall() / 2,
+                    top + resizeHandles.get(0).getWidthOfBall() / 2,
+                    right + resizeHandles.get(2).getWidthOfBall() / 2,
+                    bottom + resizeHandles.get(2).getWidthOfBall() / 2);
+
+            for(Panel panel : mPanels){
+               if(!(panel.getDefinedRect().intersects(resizedRect.left, resizedRect.top, resizedRect.right, resizedRect.bottom))){
+
+                   selectedPanel.setDefinedRect(resizedRect);
+               }
+            }
+            setHandlesToRectBounds(selectedPanel.getDefinedRect());
+            invalidate();
+            prevX = touchX;
+            prevY = touchY;
+
+        }
+
+    }
+
+    /**
+     * Detects if selected rectangles handle was touched and sets fields handleId and isHandleTouched accordingly
+     *
+     * @param   rect   rect to check for intersection side
+     */
+    private int detectIntersectedSide(Rect rect, Rect intersectedRect){
+                if(rect.left < intersectedRect.right + DISTPANELS  ){
+                    //colliding on left side
+                    return 0;
+                }if(rect.right > intersectedRect.left - DISTPANELS ){
+                    //colliding on right side
+                    return 1;
+                }if(rect.top < intersectedRect.bottom + DISTPANELS ){
+                    //colliding on top side
+                    return 2;
+                }if(rect.bottom > intersectedRect.top - DISTPANELS ){
+                    //colliding on bottom side
+                    return 3;
+                }
+        return -1;
+    }
+    /**
+     * Detects if selected rectangles handle was touched and sets fields handleId and isHandleTouched accordingly
+     *
+     * @param   positionX   x Coordinate of touchposition
+     * @param   positionY   y Coordinate of touchposition
+     */
+    private void detectTouchedHandle(int positionX, int positionY){
+        handleId = -1;
+        groupId = -1;
+        for (Handle handle : resizeHandles) {
+            // check if inside the bounds of the ball (circle)
+            // get the center for the ball
+            int centerX = handle.getX() + handle.getWidthOfBall();
+            int centerY = handle.getY() + handle.getHeightOfBall();
+            // calculate the radius from the touch to the center of the
+            // ball
+            double radCircle = Math
+                    .sqrt((double) (((centerX - positionX) * (centerX - positionX)) + (centerY - positionY)
+                            * (centerY - positionY)));
+
+            if (radCircle < handle.getWidthOfBall() + 20) {
+                //set selected handle Id
+                handleId = handle.getID();
+                if (handleId == 1 || handleId == 3) {
+                    groupId = 2;
+                } else {
+                    groupId = 1;
+                }
+                invalidate();
+                break;
+            }
+            invalidate();
+        }
+    }
+    private void showResizeHandles() {
+        Rect selectedRect = selectedPanel.getDefinedRect();
+        resizeHandles = new ArrayList<Handle>();
+        Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_resize_bubble);
+        int bitmapWidth = bitmap.getWidth(); //Width = Height as Bitmap is a Circle
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.left - bitmapWidth / 2, selectedRect.bottom - bitmapWidth / 2), 0));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.left - bitmapWidth / 2, selectedRect.top - bitmapWidth / 2), 1));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.right - bitmapWidth / 2, selectedRect.top - bitmapWidth / 2), 2));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.right - bitmapWidth / 2, selectedRect.bottom - bitmapWidth / 2), 3));
+        invalidate();
+    }
+
+    private void setHandlesToRectBounds(Rect rect){
+        int widthOfHandle = resizeHandles.get(0).getWidthOfBall()/2;
+        resizeHandles.get(0).setToCorner(rect.left- widthOfHandle, rect.bottom - widthOfHandle);
+        resizeHandles.get(1).setToCorner(rect.left - widthOfHandle, rect.top - widthOfHandle);
+        resizeHandles.get(2).setToCorner(rect.right - widthOfHandle, rect.top - widthOfHandle);
+        resizeHandles.get(3).setToCorner(rect.right - widthOfHandle, rect.bottom - widthOfHandle);
+    }
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         // event when double tap occurs
         @Override
@@ -831,7 +964,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             float x = e.getX();
             float y = e.getY();
             selectedPanel = try_to_find_panel(x,y);
-            isPanelSelected = true;
+            if(selectedPanel != null){
+               isPanelSelected = true;
+               showResizeHandles();
+            }
             Log.d("Double Tap", "Tapped at: (" + x + "," + y + ")");
 
             return true;

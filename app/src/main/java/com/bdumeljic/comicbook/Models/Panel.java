@@ -31,6 +31,16 @@ public class Panel{
     }
 
     /**
+     * Get the id of a panel
+     *
+     * @return Id of this panel
+     */
+
+    public int getId() {
+        return id;
+    }
+
+    /**
      * Get the width of a panel
      *
      * @return Width of this panel
@@ -98,5 +108,13 @@ public class Panel{
 
     public Rect getDefinedRect(){
         return this.rect;
+    }
+    /**
+     * Set the rect defined by Panel
+     * @return Rect defined by Panel
+     */
+
+    public void setDefinedRect(Rect rect){
+        this.rect = new Rect(rect);
     }
 }
