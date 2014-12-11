@@ -56,9 +56,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         private boolean mRun = false;
         private final Object mRunLock = new Object();
 
-        private int mCanvasHeight = 1;
-        private int mCanvasWidth = 1;
-
         public EditSurfaceThread(SurfaceHolder surfaceHolder, Context context) {
             // get handles to some important objects
             mSurfaceHolder = surfaceHolder;
@@ -152,6 +149,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public final int BLUE = 0;
     public final int BLACK = 1;
 
+    private int mCanvasWidth = 0;
+    private int mCanvasHeight = 0;
+
     /** Variable that keeps track of which drawing mode is used (black or blue ink). */
     public int drawing_mode;
 
@@ -239,6 +239,67 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        mCanvasWidth = w;
+        mCanvasHeight = h;
+        super.onSizeChanged(w, h, oldw, oldh);
+    }
+    public void computePreset(int presetNumber) {
+        this.clearPage();
+        this.setDrawingMode(BLACK);
+        ArrayList<Rect> rects = new ArrayList<Rect>();
+        int screenHeight = getHeight();
+        int screenWidth = getWidth();
+        int heightRect;
+        int widthRect;
+        switch(presetNumber) {
+            case 0:
+                heightRect = (screenHeight - DISTPANELS) / 2 - MARGIN;
+                widthRect = (screenWidth - DISTPANELS) / 2 - MARGIN;
+
+                rects.add(new Rect(MARGIN, MARGIN, MARGIN + widthRect, MARGIN + heightRect));
+                rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN, screenWidth - MARGIN, MARGIN + heightRect));
+                rects.add(new Rect(MARGIN, MARGIN + heightRect + DISTPANELS, MARGIN + widthRect, screenHeight - MARGIN));
+                rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN + heightRect + DISTPANELS, screenWidth - MARGIN, screenHeight - MARGIN));
+
+                for (int i = 0; i < 4; i++) {
+                    Panel panel =  new Panel(this.mContext, new Point(rects.get(i).left, rects.get(i).top), rects.get(i).height(), rects.get(i).width());
+                    mPanels.add(i, panel);
+                    mDrawings.add(new Pair(panel, PANEL));
+                }
+                break;
+            case 1:
+                heightRect = screenHeight / 3 - DISTPANELS / 2 - MARGIN;
+                widthRect = (screenWidth - DISTPANELS) / 2 - MARGIN;
+
+                rects.add(new Rect(MARGIN, MARGIN, screenWidth - MARGIN, MARGIN + heightRect));
+                rects.add(new Rect(MARGIN, MARGIN + heightRect + DISTPANELS, MARGIN + widthRect, MARGIN + 2*heightRect + DISTPANELS));
+                rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN + heightRect + DISTPANELS, screenWidth - MARGIN, MARGIN + 2*heightRect + DISTPANELS));
+                rects.add(new Rect(MARGIN, screenHeight - MARGIN - heightRect, screenWidth - MARGIN, MARGIN ));
+
+                for (int i = 0; i < 4; i++) {
+                    Panel panel =  new Panel(this.mContext, new Point(rects.get(i).left, rects.get(i).top), heightRect, rects.get(i).width());
+                    mPanels.add(i, panel);
+                    mDrawings.add(new Pair(panel, PANEL));
+                }
+                break;
+            case 2:
+                heightRect = screenHeight / 3 - DISTPANELS / 2 - MARGIN;
+                widthRect = (screenWidth - DISTPANELS) / 2 - MARGIN;
+
+                rects.add(new Rect(MARGIN, MARGIN, widthRect, screenHeight - MARGIN));
+                rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN, screenWidth - MARGIN, MARGIN + 2*heightRect));
+                rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN + 2*heightRect + DISTPANELS, screenWidth - MARGIN, screenHeight - MARGIN));
+
+                for (int i = 0; i < 3; i++) {
+                    Panel panel =  new Panel(this.mContext, new Point(rects.get(i).left, rects.get(i).top), rects.get(i).height(), rects.get(i).width());
+                    mPanels.add(i, panel);
+                    mDrawings.add(new Pair(panel, PANEL));                }
+                break;
+        }
+    }
+
     /**
      * Setup a Paint object.
      * @param p
@@ -264,6 +325,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 break;
             case BLACK:
                 drawing_mode = BLACK;
+
                 Toast.makeText(getContext(), "Selected Black Ink", Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -657,7 +719,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             top = top > mBlackPoints.get(i).y ? mBlackPoints.get(i).y:top;
         }
         if(width > 0 && height > 0) {
-            Panel panel = new Panel(getContext(), new Point(left, top), (int) height, (int) width, mPanels.size());
+            Panel panel = new Panel(getContext(), new Point(left, top), (int) height, (int) width);
             for(Panel oldPanel : mPanels){
 
                 Rect oldPanelRect = oldPanel.getDefinedRect();
