@@ -21,7 +21,7 @@ public class Panel{
      * @param width Width of the panel
      * @param id Panel ID
      */
-    public Panel(Context context, Point point, int height, int width, int id) {
+    public Panel(Context context, Point point, int height, int width) {
         this.id = count++;
         mContext = context;
         this.start = point;

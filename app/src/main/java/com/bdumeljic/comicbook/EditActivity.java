@@ -113,6 +113,11 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         return super.onOptionsItemSelected(item);
     }
 
+    public void onPresetSelected(int position) {
+        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
+        editFragment.getSurfaceView().computePreset(position);
+    }
+
     /**
      * Manage the fragment changes in the sliding drawer.
      * @param position
