@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -38,11 +39,14 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private int prevY;
     private boolean isPanelSelected = false;
     private int mTouchSlop = -1;
+    private Path mIntersectionLine = new Path();
 
     private ArrayList<Handle> resizeHandles;
     int groupId = -1;
     private int handleId = -1;
     private boolean isHandleTouched;
+    private Rect borderRect;
+    private Paint gridLinePaint;
     // variable to know what ball is being dragged
 
     /**
@@ -235,6 +239,13 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         mSelectedPaint.setColor(getResources().getColor(R.color.pink_alpha));
         mSelectedPaint.setStrokeWidth(6);
 
+        gridLinePaint = new Paint();
+        initPaint(gridLinePaint);
+        gridLinePaint.setColor(Color.LTGRAY);
+        gridLinePaint.setStrokeWidth(3);
+        gridLinePaint.setStyle(Paint.Style.STROKE);
+        gridLinePaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+
         mCurrentPath = new Path();
 
     }
@@ -247,7 +258,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     }
     public void computePreset(int presetNumber) {
         this.clearPage();
-        this.setDrawingMode(BLACK);
+        drawing_mode = BLACK;
         ArrayList<Rect> rects = new ArrayList<Rect>();
         int screenHeight = getHeight();
         int screenWidth = getWidth();
@@ -467,6 +478,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                         // move the balls the same as the finger
 
                         if ( positionX > MARGIN && positionX < this.getWidth() - MARGIN && positionY > MARGIN && positionY < this.getHeight() - MARGIN) {
+                            Log.d("DRAWING","Handle id " + handleId);
                             resizeHandles.get(handleId).setX(positionX);
                             resizeHandles.get(handleId).setY(positionY);
                             if (groupId == 1) {
@@ -572,6 +584,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * Undo the previous drawing action. Inform the user of this action.
      */
     public void onClickUndo() {
+        isPanelSelected = false;
         if (mDrawings.size() > 0) {
             if(mDrawings.get(mDrawings.size()-1).second == BLUEPATH){
                 mBluePaths.remove(mBluePaths.size()-1);
@@ -593,6 +606,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * Redo a drawing action that has been undone. Inform the user of this action.
      */
     public void onClickRedo() {
+        isPanelSelected = false;
         if (mUndoneDrawings.size() > 0) {
             if(mUndoneDrawings.get(mUndoneDrawings.size()-1).second == BLUEPATH){
                 mBluePaths.add((Path) mUndoneDrawings.get(mUndoneDrawings.size()-1).first);
@@ -641,11 +655,16 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             }
 
             // If a panel is selected redraw it with the selected paint.
-            if (selectedPanel != null) {
+            if (isPanelSelected && selectedPanel != null) {
                 canvas.drawRect(selectedPanel.getDefinedRect(),  mSelectedPaint);
+                canvas.drawRect(borderRect, gridLinePaint);
                 for(Handle ball : resizeHandles){
                     canvas.drawBitmap(ball.getBitmap(),ball.getX(),ball.getY(), mSelectedPaint);
                 }
+                canvas.drawLine(MARGIN, selectedPanel.getDefinedRect().bottom , this.getWidth(), selectedPanel.getDefinedRect().bottom , gridLinePaint);
+                canvas.drawLine(selectedPanel.getDefinedRect().left, MARGIN, selectedPanel.getDefinedRect().left, this.getHeight() - MARGIN, gridLinePaint);
+                canvas.drawLine(MARGIN, selectedPanel.getDefinedRect().top, this.getWidth() - MARGIN, selectedPanel.getDefinedRect().top, gridLinePaint);
+                canvas.drawLine(selectedPanel.getDefinedRect().right, MARGIN, selectedPanel.getDefinedRect().right, this.getHeight() - MARGIN, gridLinePaint);
                 Log.d(TAG, "there is a selected panel");
             }
 
@@ -911,17 +930,18 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             Rect resizedRect = new Rect(
                     left + resizeHandles.get(0).getWidthOfBall() / 2,
                     top + resizeHandles.get(0).getWidthOfBall() / 2,
-                    right + resizeHandles.get(2).getWidthOfBall() / 2,
-                    bottom + resizeHandles.get(2).getWidthOfBall() / 2);
+                    right + resizeHandles.get(0).getWidthOfBall() / 2,
+                    bottom + resizeHandles.get(0).getWidthOfBall() / 2);
 
-            for(Panel panel : mPanels){
-               if(!(panel.getDefinedRect().intersects(resizedRect.left, resizedRect.top, resizedRect.right, resizedRect.bottom))){
+                for (Panel panel : mPanels) {
+                    if (mPanels.size() > 1 && panel.getDefinedRect().intersects(resizedRect.left, resizedRect.top, resizedRect.right, resizedRect.bottom)) {
 
-                   selectedPanel.setDefinedRect(resizedRect);
-               }
-            }
+                    }
+                    else {
+                        selectedPanel.setDefinedRect(resizedRect);
+                    }
+                }
             setHandlesToRectBounds(selectedPanel.getDefinedRect());
-            invalidate();
             prevX = touchX;
             prevY = touchY;
 
@@ -978,7 +998,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 } else {
                     groupId = 1;
                 }
-                invalidate();
                 break;
             }
             invalidate();
@@ -989,19 +1008,19 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         resizeHandles = new ArrayList<Handle>();
         Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_resize_bubble);
         int bitmapWidth = bitmap.getWidth(); //Width = Height as Bitmap is a Circle
-        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.left - bitmapWidth / 2, selectedRect.bottom - bitmapWidth / 2), 0));
-        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.left - bitmapWidth / 2, selectedRect.top - bitmapWidth / 2), 1));
-        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.right - bitmapWidth / 2, selectedRect.top - bitmapWidth / 2), 2));
-        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.right - bitmapWidth / 2, selectedRect.bottom - bitmapWidth / 2), 3));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.left - bitmapWidth / 2, selectedRect.top - bitmapWidth / 2), 0));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.right - bitmapWidth / 2, selectedRect.top - bitmapWidth / 2), 1));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.right - bitmapWidth / 2, selectedRect.bottom - bitmapWidth / 2), 2));
+        resizeHandles.add(new Handle(getContext(), bitmap, new Point(selectedRect.left - bitmapWidth / 2, selectedRect.bottom - bitmapWidth / 2), 3));
         invalidate();
     }
 
     private void setHandlesToRectBounds(Rect rect){
         int widthOfHandle = resizeHandles.get(0).getWidthOfBall()/2;
-        resizeHandles.get(0).setToCorner(rect.left- widthOfHandle, rect.bottom - widthOfHandle);
-        resizeHandles.get(1).setToCorner(rect.left - widthOfHandle, rect.top - widthOfHandle);
-        resizeHandles.get(2).setToCorner(rect.right - widthOfHandle, rect.top - widthOfHandle);
-        resizeHandles.get(3).setToCorner(rect.right - widthOfHandle, rect.bottom - widthOfHandle);
+        resizeHandles.get(0).setToCorner(rect.left- widthOfHandle, rect.top - widthOfHandle);
+        resizeHandles.get(1).setToCorner(rect.right - widthOfHandle, rect.top - widthOfHandle);
+        resizeHandles.get(2).setToCorner(rect.right - widthOfHandle, rect.bottom - widthOfHandle);
+        resizeHandles.get(3).setToCorner(rect.left - widthOfHandle, rect.bottom - widthOfHandle);
     }
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         // event when double tap occurs
@@ -1013,10 +1032,15 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             if(selectedPanel != null){
                isPanelSelected = true;
                showResizeHandles();
+               showBorders();
             }
             Log.d("Double Tap", "Tapped at: (" + x + "," + y + ")");
 
             return true;
         }
+    }
+
+    private void showBorders() {
+        borderRect = new Rect(MARGIN, MARGIN, mCanvasWidth - MARGIN, mCanvasHeight - MARGIN);
     }
 }
