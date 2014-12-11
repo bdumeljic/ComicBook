@@ -148,9 +148,6 @@ public class EditFragment extends Fragment {
         Button blueButton = (Button) view.findViewById(R.id.button_blue);
         Button blackButton = (Button) view.findViewById(R.id.button_black);
 
-        Button undoButton = (Button) view.findViewById(R.id.undoBtn);
-        Button redoButton = (Button) view.findViewById(R.id.redoBtn);
-
         blueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
