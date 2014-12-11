@@ -3,7 +3,7 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -12,8 +12,6 @@ import android.widget.TextView;
 
 import com.bdumeljic.comicbook.Models.Page;
 import com.bdumeljic.comicbook.Models.Project;
-import com.bdumeljic.comicbook.Models.Volume;
-import com.bdumeljic.comicbook.dummy.DummyContent;
 
 import java.util.ArrayList;
 
@@ -32,6 +30,8 @@ public class PagesFragment extends ListFragment {
 
     public final static String PROJECT = "param_project";
     public final static String VOLUME = "param_volume";
+
+    String TAG = "PagesFragment";
 
     private long mProject;
     private long mVolume;
@@ -116,7 +116,7 @@ public class PagesFragment extends ListFragment {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             long number = mPagesAdapter.getItem(position).getNumber();
-
+            Log.e(TAG, "page selected: " + number);
             mListener.onFragmentInteraction(number);
         }
     }
@@ -133,7 +133,7 @@ public class PagesFragment extends ListFragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(long id);
+        public void onFragmentInteraction(long num);
     }
 
     /**

@@ -2,12 +2,15 @@ package com.bdumeljic.comicbook.Models;
 
 import android.util.Log;
 
+import com.google.gson.annotations.SerializedName;
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 import java.util.List;
 
 public class Volume extends SugarRecord<Volume> {
-    public long id;
+    private long id;
     public long volumeId;
     private String title;
     private long projectId;
@@ -20,10 +23,6 @@ public class Volume extends SugarRecord<Volume> {
         this.volumeId = volId;
         this.title = title;
         this.projectId = projectID;
-        addPage();
-        addPage();
-        addPage();
-
     }
 
     public String getTitle() {
@@ -39,24 +38,36 @@ public class Volume extends SugarRecord<Volume> {
     }
 
     public void addPage() {
-        int pageNum = (int) Page.count(Page.class, "volume_id = ?", new String[]{String.valueOf(volumeId)});
-        Page page = new Page(pageNum + 1, volumeId);
+        //Select numPagesQuery = Select.from(Page.class)
+          //      .where(Condition.prop("volume_id").eq(getId()));
+        //long numberPagesInVol = numPagesQuery.count();
+        //int pageNum = (int) numberPagesInVol;
+        int pageNum = (int) Page.count(Page.class, "volume_id = ?", new String[]{String.valueOf(getId())});
+        Page page = new Page(pageNum + 1, getId());
         page.save();
 
-        Log.e("VOL ADD PAGE", "added page with num " + String.valueOf(pageNum) + " to vol " + volumeId);
+        Log.e("VOL ADD PAGE", "added page with num " + String.valueOf(pageNum + 1) + " to vol " + getId() + " which is vol " + volumeId + " in project");
 
     }
 
     public List<Page> getPages() {
-        return Page.find(Page.class, "volume_id = ?", String.valueOf(volumeId));
+        return Page.find(Page.class, "volume_id = ?", String.valueOf(getId()));
     }
 
     public Page getPage(long num) {
-        return Page.find(Page.class, "volume_id = ? and number = ?", new String[]{String.valueOf(volumeId), String.valueOf(num)}).get(0);
+        Log.e("VOL", "getting page for vol" + volumeId + "with id " + getId());
+        Select specificPageQuery = Select.from(Page.class)
+                .where(Condition.prop("volume_id").eq(getId()),
+                        Condition.prop("number").eq(num))
+                .limit(String.valueOf(1));
+
+        Page page = (Page) specificPageQuery.first();
+        //return Page.find(Page.class, "volume_id = ? and number = ?", new String[]{String.valueOf(this.id), String.valueOf(num)}).get(0);
+        return page;
     }
 
     @Override
     public String toString() {
-        return "Volume id: " + String.valueOf(volumeId) + " with title: " + title + " of project: " + projectId;
+        return "Volume id: " + String.valueOf(getId()) + " volId: " + String.valueOf(volumeId) + " with title: " + title + " of project: " + projectId;
     }
 }

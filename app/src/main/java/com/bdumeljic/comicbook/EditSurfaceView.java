@@ -6,9 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,9 +13,13 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.bdumeljic.comicbook.Models.Page;
 import com.bdumeljic.comicbook.Models.Panel;
+import com.bdumeljic.comicbook.Models.Project;
+import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Custom {@link android.view.SurfaceView} used for drawing the page layout. One surface is one page in a comic book volume.
@@ -29,12 +30,19 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     boolean surfaceCreated;
 
+    public Page currentPage;
+    public Volume volume;
+
+    private long projectId;
+    private long volumeId;
+    private long pageNum;
+
     /**
      * Thread used for managing the {@link com.bdumeljic.comicbook.EditSurfaceView}.
      */
     class EditSurfaceThread extends Thread {
 
-        private SurfaceHolder mSurfaceHolder;
+        private final SurfaceHolder mSurfaceHolder;
 
         /** Variable that keeps track if the surface thread is running or not. */
         private boolean mRun = false;
@@ -206,7 +214,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         initPaint(mSelectedPaint);
         mSelectedPaint.setStyle(Paint.Style.FILL);
         mSelectedPaint.setColor(getResources().getColor(R.color.pink_alpha));
-        mSelectedPaint.setStrokeWidth(6);
+        mSelectedPaint.setStrokeWidth(6f);
 
         mCurrentPath = new Path();
 
@@ -222,7 +230,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeJoin(Paint.Join.ROUND);
         p.setStrokeCap(Paint.Cap.ROUND);
-        p.setStrokeWidth(4);
+        p.setStrokeWidth(4f);
     }
 
     /**
@@ -480,14 +488,26 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        Log.e(TAG, "started on draw");
         if (isDrawingModeBlue()) {
+            Log.e(TAG, "drawing in blue");
+
+            Log.e(TAG, "drawing current path");
+
             // Draw the latest blue path.
             canvas.drawPath(mCurrentPath, mBluePaint);
 
+            Log.e(TAG, "drawing blue paths");
+
             // Draw the older blue paths.
             for (Path pBlue : mBluePaths) {
+                Log.e(TAG, "blue path" + pBlue.toString() + " paint " + mBluePaint);
+
                 canvas.drawPath(pBlue, mBluePaint);
+                Log.e(TAG, "blue path" + pBlue.toString());
             }
+
+            Log.e(TAG, "done with blue paths");
 
             // Draw the black panels if the black ink is visible.
             if(visibilityBlack) {
@@ -498,6 +518,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         if (isDrawingModeBlack()) {
+            Log.e(TAG, "drawing in black");
             // First draw all the panels.
             for (Panel panel : mPanels) {
                 canvas.drawRect(panel.getX(),  panel.getY(),  panel.getX() + panel.getWidth(), panel.getY() + panel.getHeight(),  mBlackPaint);
@@ -660,7 +681,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             Log.d(TAG, "surface created.. new ..");
 
             thread.setRunning(true);
-           // thread.start();
+
+            // TODO set the initial page to page 1 of vol
         }
     }
 
@@ -719,22 +741,82 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
     }
 
-    public void setBluePaths(ArrayList<Path> blueLines) {
+    public void setToFirstPage(long project, long vol, long num) {
+        Log.e(TAG, "starting first page");
+
+        this.projectId = project;
+        this.volumeId = vol;
+        this.pageNum = num;
+
+        this.volume = Project.findProject(projectId).getVolume(volumeId);
+        this.currentPage = volume.getPage(pageNum);
+
+        //loadPageFromDB();
+
+        Toast.makeText(getContext(), "First page", Toast.LENGTH_SHORT).show();
+    }
+
+    public void changePage(long num) {
+        Log.e(TAG, "started changing page");
+        this.pageNum = num;
+        this.currentPage = volume.getPage(pageNum);
+
+        loadPageFromDB();
+
+        Toast.makeText(getContext(), "Changed page", Toast.LENGTH_SHORT).show();
+    }
+
+    private void loadPageFromDB() {
+        Log.e(TAG, "started loading page drawings");
+
+        Log.e(TAG, "starting loading");
+        this.currentPage.loadPageInfo();
+
+        Log.e(TAG, "starting setting blue paths");
+        setBluePaths();
+        Log.e(TAG, "starting setting panels");
+        setPanels();
+
+        Log.e(TAG, "redrawing");
+        invalidate();
+
+        Log.e(TAG, "done showing page: " + currentPage.getId() + " of v " + currentPage.getVolumeId()  + volume.getVolumeId() + " of p " + volume.getProjectId());
+
+
+        Toast.makeText(getContext(), "Loaded page", Toast.LENGTH_SHORT).show();
+    }
+
+    public void setBluePaths() {
+        ArrayList<Path> newPaths = this.currentPage.getBlueLines();
+
         mBluePaths.clear();
-        if (blueLines != null && !blueLines.isEmpty()) {
-            for (Path line : blueLines) {
+        if (newPaths != null && !newPaths.isEmpty()) {
+            for (Path line : newPaths) {
                 mBluePaths.add(line);
             }
         }
-        invalidate();
+
+        Log.e(TAG, "new list of blue :" + mBluePaths.toString());
+
     }
 
-    public void setPanels(ArrayList<Panel> panels) {
+    public void setPanels() {
+        ArrayList<Panel> newPanels = this.currentPage.getPanels();
+
         mPanels.clear();
-        if (panels != null && !panels.isEmpty()) {
-            for (Panel p : panels) {
+        if (newPanels != null && !newPanels.isEmpty()) {
+            for (Panel p : newPanels) {
                 mPanels.add(p);
-            }        }
-        invalidate();
+            }
+        }
+
+        Log.e(TAG, "new list of panels :" + mPanels.toString());
+
+    }
+
+    public void savePage() {
+        Log.e(TAG, "saving to: " + currentPage.getNumber()  );
+        this.currentPage.savePage(mPanels, mBluePaths);
+        Toast.makeText(getContext(), "Saved page", Toast.LENGTH_SHORT).show();
     }
 }

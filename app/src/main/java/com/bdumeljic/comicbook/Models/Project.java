@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.orm.SugarRecord;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Project extends SugarRecord<Project> {
@@ -20,19 +19,21 @@ public class Project extends SugarRecord<Project> {
     public Project(long projectId, String title, String volume) {
         this.projectId = projectId;
         this.title = title;
-        addVolume(volume);
+        Volume first = addVolume(volume);
+        first.addPage();
     }
 
     public String getProjectName() {
         return this.title;
     }
 
-    public void addVolume(String title) {
+    public Volume addVolume(String title) {
         long vId = Volume.count(Volume.class, "project_id = ?", new String[]{String.valueOf(projectId)});
         Volume volume = new Volume(vId, title, projectId);
         volume.save();
 
-        Log.e("PROJECT ADD VOL", "added vol with " + String.valueOf(vId) + " title " + title + " to project " + projectId);
+        Log.e("PROJECT ADD VOL", "id " + volume.getId() + "added vol with " + String.valueOf(vId) + " title " + title + " to project " + projectId);
+        return volume;
     }
 
      public Volume getVolume(long volId) {
