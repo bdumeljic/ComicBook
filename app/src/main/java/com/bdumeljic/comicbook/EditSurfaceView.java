@@ -770,8 +770,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.e(TAG, "started loading page drawings");
 
         Log.e(TAG, "starting loading");
-        this.currentPage.loadPageInfo();
-
+        //this.currentPage.loadPageInfo();
+        new PageLoader(currentPage, this).execute();
+/*
         Log.e(TAG, "starting setting blue paths");
         setBluePaths();
         Log.e(TAG, "starting setting panels");
@@ -784,6 +785,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
 
         Toast.makeText(getContext(), "Loaded page", Toast.LENGTH_SHORT).show();
+        */
     }
 
     public void setBluePaths() {
