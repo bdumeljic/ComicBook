@@ -4,15 +4,27 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 
-public class Panel{
-    Context mContext;
+import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
+
+public class Panel extends SugarRecord<Panel> {
+    long id;
+
     int startX;
     int startY;
     int width;
     int height;
-    int id;
+
+    long pageId;
+
+    @Ignore
     Rect rect;
-    static int count = 0;
+
+    //static int count = 0;
+
+    public Panel() {
+
+    }
 
     /**
      * Create a new panel
@@ -22,24 +34,26 @@ public class Panel{
      * @param height Height of the panel
      * @param width Width of the panel
      */
-    public Panel(Context context, int pointX, int pointY, int height, int width) {
-        this.id = count++;
-        mContext = context;
+    public Panel(int pointX, int pointY, int height, int width) {
         this.startX = pointX;
         this.startY = pointY;
         this.height = height;
         this.width = width;
-        this.rect = new Rect(pointX, pointY, pointX + width, pointY + height);
+        this.pageId = -1;
+
+        this.rect = new Rect(startX, startY, startX + width, startY + height);
     }
 
     /**
-     * Get the id of a panel
-     *
-     * @return Id of this panel
+     * Get the id of the page this panel belongs to.
+     * @return Page Id
      */
+    public long getPageId() {
+        return pageId;
+    }
 
-    public int getId() {
-        return id;
+    public void setPageId(long page) {
+        this.pageId = page;
     }
 
     /**
@@ -109,7 +123,11 @@ public class Panel{
      */
 
     public Rect getDefinedRect(){
-        return this.rect;
+        if (rect == null) {
+            this.rect = new Rect(startX, startY, startX + width, startY + height);
+        }
+
+        return rect;
     }
     /**
      * Set the rect defined by Panel

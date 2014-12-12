@@ -4,12 +4,16 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bdumeljic.comicbook.Models.Page;
+import com.bdumeljic.comicbook.Models.Panel;
+
+import java.util.ArrayList;
 
 public class PageLoader extends AsyncTask<Void, Void, EditSurfaceView> {
     private static final String TAG = "PageLoader";
 
     private Page page;
     private EditSurfaceView mEditSurfaceView;
+    private ArrayList<Panel> panels;
 
     public PageLoader(Page page, EditSurfaceView view) {
         this.page = page;
@@ -20,13 +24,12 @@ public class PageLoader extends AsyncTask<Void, Void, EditSurfaceView> {
     protected void onPreExecute() {
         super.onPreExecute();
 
-        mEditSurfaceView.getThread().setRunning(false);
+        //mEditSurfaceView.getThread().setRunning(false);
     }
 
     @Override
     protected EditSurfaceView doInBackground(Void... params) {
-
-        page.loadPageInfo();
+        //panels = (ArrayList<Panel>) Panel.find(Panel.class, "page_id = ?", String.valueOf(page.getId()));
         return null;
     }
 
