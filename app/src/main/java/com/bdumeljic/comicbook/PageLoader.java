@@ -36,8 +36,8 @@ public class PageLoader extends AsyncTask<Void, Void, EditSurfaceView> {
 
         //mEditSurfaceView.getThread().setRunning(true);
 
-        mEditSurfaceView.setBluePaths();
-        mEditSurfaceView.setPanels();
+        //mEditSurfaceView.setBluePaths();
+        //mEditSurfaceView.setPanels();
 
        // mEditSurfaceView.invalidate();
 

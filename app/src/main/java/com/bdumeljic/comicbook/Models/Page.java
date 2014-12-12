@@ -1,5 +1,6 @@
 package com.bdumeljic.comicbook.Models;
 
+import android.content.Context;
 import android.graphics.Path;
 import android.util.Log;
 
@@ -8,6 +9,11 @@ import com.google.gson.reflect.TypeToken;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,52 +53,9 @@ public class Page extends SugarRecord<Page> {
     }*/
 
     public void loadPageInfo() {
-        Gson gson = new Gson();
-        Type pathType = new TypeToken<ArrayList<Path>>() {}.getType();
-        Type panelType = new TypeToken<ArrayList<Panel>>() {}.getType();
 
-        Log.e("PAGE panels", "p " + panels);
 
-        if(panels != null && !panels.isEmpty()) {
-            Log.e("PAGE panels", "p " + panels);
-
-            List<Panel> listPanels = gson.fromJson(panels, panelType);
-
-            mPanelsList = new ArrayList<Panel>();
-            /*for (Panel p : listPanels) {
-                mPanelsList.add(p);
-            }*/
-            mPanelsList.addAll(listPanels);
-            Log.e("PAGE", "array of panels: " + mPanelsList.toString());
-        }
-
-        Log.e("PAGE bluelines", "b " + blueLines);
-
-        if(blueLines != null && !blueLines.isEmpty()) {
-            List<Path> listPaths = gson.fromJson(blueLines, pathType);
-
-            mBlueLinesList = new ArrayList<Path>();
-            /*for (Path p : listPaths) {
-                mBlueLinesList.add(p);
-            }*/
-            mBlueLinesList.addAll(listPaths);
-            Log.e("PAGE", "array of paths: " + mBlueLinesList.toString());
-        }
-
-        Log.e("PAGE", "loaded succesfully, returning");
-    }
-
-    public void savePage(ArrayList<Panel> panels, ArrayList<Path> blueLines) {
-        Gson gson = new Gson();
-        Type pathType = new TypeToken<ArrayList<Path>>() {}.getType();
-        Type panelType = new TypeToken<ArrayList<Panel>>() {}.getType();
-
-        this.panels = gson.toJson(panels, panelType);
-        this.blueLines = gson.toJson(blueLines, pathType);
-        this.save();
-
-        Page page = Page.find(Page.class, "volume_id = ? and number = ?", new String[]{String.valueOf(volumeId), String.valueOf(number)}).get(0);
-        Log.e("PAGE", page.toString());
+        //Log.e("PAGE", "loaded succesfully, returning");
     }
 
     public ArrayList<Panel> getPanels() {

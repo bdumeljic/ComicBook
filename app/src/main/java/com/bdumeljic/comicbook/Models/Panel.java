@@ -5,7 +5,8 @@ import android.graphics.Point;
 
 public class Panel {
     Context mContext;
-    Point start;
+    int startX;
+    int startY;
     int width;
     int height;
     int id;
@@ -22,7 +23,8 @@ public class Panel {
     public Panel(Context context, Point point, int height, int width, int id) {
         this.id = count++;
         mContext = context;
-        this.start = point;
+        this.startX = point.x;
+        this.startY = point.y;
         this.height = height;
         this.width = width;
     }
@@ -50,7 +52,7 @@ public class Panel {
      * @return X value of the starting point
      */
     public int getX() {
-        return start.x;
+        return startX;
     }
 
     /**
@@ -58,6 +60,6 @@ public class Panel {
      * @return Y value of the starting point
      */
     public int getY() {
-        return start.y;
+        return startY;
     }
 }
