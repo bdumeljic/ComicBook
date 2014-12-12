@@ -68,9 +68,6 @@ public class NavigationDrawerFragment extends Fragment {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
             mFromSavedInstanceState = true;
         }
-
-        // Select either the default item (0) or the last selected item.
-        selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -126,6 +123,8 @@ public class NavigationDrawerFragment extends Fragment {
         if(!mUserLearnedDrawer) {
             mDrawerLayout.openDrawer(mDrawer);
         }
+
+        selectItem(mCurrentSelectedPosition);
     }
 
     private void selectItem(int position) {

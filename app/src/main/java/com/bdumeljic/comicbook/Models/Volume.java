@@ -10,17 +10,30 @@ import com.orm.query.Select;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Model that represents a volume.
+ */
 public class Volume extends SugarRecord<Volume> {
+    /** Overall volume id from the database. */
     private long id;
 
+    /** Id of volume within a project. */
     public long volumeId;
+    /** Volume title */
     private String title;
+    /** Id of the project this volume belongs to. */
     private long projectId;
 
     public Volume() {
 
     }
 
+    /**
+     * Creates a new volume by providing the project id, volume id withing that project and title.
+     * @param volId
+     * @param title
+     * @param projectID
+     */
     public Volume(long volId, String title, long projectID) {
         this.volumeId = volId;
         this.title = title;
@@ -39,6 +52,9 @@ public class Volume extends SugarRecord<Volume> {
         return projectId;
     }
 
+    /**
+     * Add a page to this volume.
+     */
     public void addPage() {
         int pageNum = (int) Page.count(Page.class, "volume_id = ?", new String[]{String.valueOf(getId())});
         Page page = new Page(pageNum + 1, getId());
@@ -48,10 +64,19 @@ public class Volume extends SugarRecord<Volume> {
 
     }
 
+    /**
+     * Retrieve all the pages from this volume.
+     * @return An arraylist of pages
+     */
     public ArrayList<Page> getPages() {
         return (ArrayList<Page>) Page.find(Page.class, "volume_id = ?", String.valueOf(this.getId()));
     }
 
+    /**
+     * Get a specific page from this volume.
+     * @param num Number of the page
+     * @return The page
+     */
     public Page getPage(long num) {
         Log.e("VOL", "getting page for vol" + volumeId + "with id " + getId());
         Select specificPageQuery = Select.from(Page.class)

@@ -77,15 +77,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        Button mSaveButton = (Button) view.findViewById(R.id.save);
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mListener != null) {
-                    mListener.onFragmentInteraction(SAVE, false);
-                }
-            }
-        });
 
         return view;
     }

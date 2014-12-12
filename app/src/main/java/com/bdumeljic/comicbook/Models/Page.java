@@ -7,7 +7,11 @@ import com.orm.dsl.Ignore;
 
 import java.util.ArrayList;
 
-
+/**
+ * Page Model
+ * </p>
+ * Represents one page in a volume.
+ */
 public class Page extends SugarRecord<Page> {
     private long id;
 
@@ -15,7 +19,7 @@ public class Page extends SugarRecord<Page> {
     private long volumeId;
 
     @Ignore
-    private ArrayList<Panel> mPanels;
+    public ArrayList<Panel> mPanels;
     @Ignore
     private int mLayoutPreset = -1;
 
@@ -23,6 +27,11 @@ public class Page extends SugarRecord<Page> {
 
     }
 
+    /**
+     * Creat a new page using the page number and the volume id
+     * @param num
+     * @param volId
+     */
     public Page(int num, long volId) {
         this.number = num;
         this.volumeId = volId;
@@ -33,21 +42,15 @@ public class Page extends SugarRecord<Page> {
     public void addPanel(Panel pan) {
         pan.setPageId(getId());
         pan.save();
-        this.mPanels.add(pan);
     }
 
-    public void loadPageInfo() {
-        //Log.e("PAGE", "loaded succesfully, returning");
-    }
 
     public ArrayList<Panel> getPanels() {
-        Log.e("PANEL", "starting getting panels: " + mPanels);
         if (mPanels != null) {
             return mPanels;
         }
 
         this.mPanels = (ArrayList<Panel>) Panel.find(Panel.class, "page_id = ?", String.valueOf(getId()));
-        Log.e("PANEL", "got panels: " + mPanels.size());
 
         return mPanels;
     }
@@ -63,9 +66,5 @@ public class Page extends SugarRecord<Page> {
     public long getVolumeId() {
         return volumeId;
     }
-/*
-    @Override
-    public String toString() {
-        return "Page of vol: " + volumeId + " num: " + number + " panels " + panels + " blue " + blueLines + " ::: " + mBlueLinesList.toString() + panels.toString();
-    }*/
+
 }

@@ -262,7 +262,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * @param presetNumber
      */
     public void computePreset(int presetNumber) {
-        this.clearPage();
+        clearPage();
+        deletePageContents();
         drawing_mode = BLACK;
         ArrayList<Rect> rects = new ArrayList<Rect>();
         int screenHeight = getHeight();
@@ -407,7 +408,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public boolean onTouchEvent(MotionEvent event) {
         //double tap check
         gestureDetector.onTouchEvent(event);
-        Log.d("DRAWING", "Panel not selected? " + isPanelSelected);
+        Log.d("DRAWING", "Panel not selected? " + isPanelSelected);;
 
         if(!isPanelSelected){
             drawPath(event);
@@ -682,7 +683,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         try {
-            Thread.sleep(25);
+            Thread.sleep(75);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -910,7 +911,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         this.currentPage = volume.getPage(pageNum);
 
 
-        //loadPageFromDB();
+        loadPageFromDB();
 
         Toast.makeText(getContext(), "First page", Toast.LENGTH_SHORT).show();
     }
@@ -936,14 +937,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     }
 
     public void addPage() {
-        Log.d(TAG, "adding page");
-
         this.volume.addPage();
     }
 
     public void deletePageContents() {
-        Log.d(TAG, "starting delete contents");
-
         Panel.deleteAll(Panel.class, "page_id = ?", String.valueOf(currentPage.getId()));
         clearPage();
     }
@@ -975,7 +972,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             bottom = bottom < resizeHandles.get(i).getY() ? resizeHandles.get(i).getY():bottom;
         }
         // Check if rectangle is within the visible screen
-        if (((left > MARGIN ) && (right < mScreenWidth - MARGIN) && ((top > MARGIN) && (bottom  < mScreenHeight - MARGIN)))) {
+        if (((left > MARGIN  ) && (right < mScreenWidth - MARGIN) && ((top > MARGIN) && (bottom  < mScreenHeight - MARGIN)))) {
             // invalidate current position as we are moving...
             Rect resizedRect = new Rect(
                     left + resizeHandles.get(0).getWidthOfBall() / 2,
@@ -985,7 +982,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
                 for (Panel panel : mPanels) {
                     if (mPanels.size() > 1 && panel.getDefinedRect().intersects(resizedRect.left, resizedRect.top, resizedRect.right, resizedRect.bottom)) {
-
+                        Log.e(TAG, "intersect");
                     }
                     else {
                         //if nothing intersects we can set the panel to the new dimensions

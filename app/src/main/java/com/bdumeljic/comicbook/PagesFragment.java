@@ -3,7 +3,6 @@ package com.bdumeljic.comicbook;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bdumeljic.comicbook.Models.Page;
-import com.bdumeljic.comicbook.Models.Project;
 import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
@@ -54,9 +52,7 @@ public class PagesFragment extends ListFragment {
      */
      public static PagesFragment newInstance(long project, long volume) {
         PagesFragment fragment = new PagesFragment();
-         Log.e("pages", "getting pages for arg p: " + project + " " + volume);
-
-         Bundle args = new Bundle();
+        Bundle args = new Bundle();
         args.putLong(PROJECT, project);
         args.putLong(VOLUME, volume);
         fragment.setArguments(args);
@@ -84,16 +80,10 @@ public class PagesFragment extends ListFragment {
         }
 
         if(mProject > 0 && mVolume > 0) {
-            Log.e(TAG, "getting pages for arg p: " + mProject + " " + mVolume);
-
-            Log.e(TAG, "getting pages for p: " + mProject + " " + mVolume);
             mPages = Volume.findById(Volume.class, mVolume).getPages();
 
             mPagesAdapter = new PagesAdapter(mPages);
             setListAdapter(mPagesAdapter);
-            //getListView().invalidate();
-
-            Log.e(TAG, "received pages: " + mPages.toString());
         }
     }
 
@@ -101,6 +91,7 @@ public class PagesFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_pages, container, false);
 
+        // Add page button
         Button button = (Button) view.findViewById(R.id.add_new_page_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +99,6 @@ public class PagesFragment extends ListFragment {
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    Log.e(TAG, "page selected: " + -1);
                     mListener.onFragmentInteraction(-1);
                 }
             }
@@ -118,8 +108,6 @@ public class PagesFragment extends ListFragment {
     }
 
     public void update() {
-        Log.e(TAG, "getting pages for p: " + mProject + " " + mVolume);
-
         if(mProject > 0 && mVolume > 0) {
             mPages = Volume.findById(Volume.class, mVolume).getPages();
 
@@ -128,24 +116,7 @@ public class PagesFragment extends ListFragment {
             getListView().invalidate();
             getListView().setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
             getListView().setStackFromBottom(true);
-
-            Log.e(TAG, "received pages: " + mPages.toString());
-        } else {
-            Log.e(TAG, "nothing to update");
         }
-
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getListView().invalidate();
     }
 
     @Override
@@ -174,7 +145,6 @@ public class PagesFragment extends ListFragment {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             long number = mPagesAdapter.getItem(position).getNumber();
-            Log.e(TAG, "page selected: " + number);
             mListener.onFragmentInteraction(number);
         }
     }

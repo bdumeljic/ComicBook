@@ -77,42 +77,33 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         {
             mProjectId = extras.getLong(PROJECT, -1);
             mVolId = extras.getLong(VOLUME, -1);
-
-            Log.d("EditActivity", "received it" + mProjectId + " " + mVolId);
-
         }
-
-        Project p = Project.findById(Project.class, mProjectId);
-        Volume vol = Volume.findById(Volume.class, mVolId);
-
-        Log.d("EditActivity", "after vol pro it" + mProjectId + " " + mVolId);
-
-        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(vol.getVolumeId() + 1) + " " + vol.getTitle());
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
-
-
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        Log.e(TAG, "getting pages for p: " + mProjectId + " " + mVolId);
-
-        pages = PagesFragment.newInstance(mProjectId, mVolId);
-        presets = new PagesPresetsFragment();
-        settings = new SettingsFragment();
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
                     .add(R.id.container, EditFragment.newInstance(mProjectId, mVolId))
                     .commit();
         }
+
+        Project p = Project.findById(Project.class, mProjectId);
+        Volume vol = Volume.findById(Volume.class, mVolId);
+
+        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(vol.getVolumeId() + 1) + " " + vol.getTitle());
+
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getFragmentManager().findFragmentById(R.id.navigation_drawer);
+
+        pages = PagesFragment.newInstance(mProjectId, mVolId);
+        presets = new PagesPresetsFragment();
+        settings = new SettingsFragment();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
 
@@ -220,7 +211,7 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
      */
     @Override
     public void onFragmentInteraction(long num) {
-        Log.e(TAG, "starting change page with num: " + num);
+        //Log.e(TAG, "starting change page with num: " + num);
         EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
 
         if(num < 0) {
@@ -231,8 +222,6 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     }
 
     public void deletePageContentsDialog() {
-        Log.d(TAG, "starting delete contents dialog");
-
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setMessage(R.id.delete_page_contents)
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

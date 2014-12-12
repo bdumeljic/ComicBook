@@ -23,12 +23,15 @@ public class Project extends SugarRecord<Project> {
         return this.title;
     }
 
+    /**
+     * Add a volume to this project.
+     * @param title Volume title
+     * @return The created volume
+     */
     public Volume addVolume(String title) {
         long vId = Volume.count(Volume.class, "project_id = ?", new String[]{String.valueOf(getId())});
         Volume volume = new Volume(vId, title, getId());
         volume.save();
-
-        Log.e("PROJECT ADD VOL", "id " + volume.getId() + "added vol with " + String.valueOf(vId) + " title " + title + " to project " + getId());
         return volume;
     }
 
@@ -36,9 +39,11 @@ public class Project extends SugarRecord<Project> {
         return Volume.find(Volume.class, "project_id = ? and volume_id = ?", new String[]{String.valueOf(getId()), String.valueOf(volId)}).get(0);
     }
 
-
+    /**
+     * Retrieve all the volumes for this project.
+     * @return An arraylist of volumes
+     */
     public List<Volume> getVolumes() {
-        Log.e("PROJECT", "getting volumes for project " + getId());
         return Volume.find(Volume.class, "project_id = ?", String.valueOf(getId()));
     }
 

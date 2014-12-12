@@ -91,8 +91,6 @@ public class EditFragment extends Fragment {
                     @Override
                     public void onSystemUiVisibilityChange(int i) {
                         int height = mDecorView.getHeight();
-                        Log.i(TAG, "Current height: " + height + " i " + i);
-
                         Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
                             @Override
@@ -120,13 +118,11 @@ public class EditFragment extends Fragment {
 
             @Override
             public void onSwipeLeft() {
-                Log.d("EDGESWIPE", "left");
                 mEditSurfaceView.onClickUndo();
             }
 
             @Override
             public void onSwipeRight() {
-                Log.d("EDGESWIPE", "right");
                 mEditSurfaceView.onClickRedo();
             }
         };
@@ -151,12 +147,15 @@ public class EditFragment extends Fragment {
             }
         });
 
+        /** Set the canvas to show the first page in the volume after the surface has been created. */
         mEditSurfaceView.setToFirstPage(mProjectId, mVolumeId, 1);
 
         return view;
     }
 
-    /** Hide the system bars */
+    /**
+     * Hide the system bars on android versions above KitKat, otherwise use fullscreen.
+     * */
     public void hideSystemUI() {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
@@ -181,31 +180,45 @@ public class EditFragment extends Fragment {
         return mEditSurfaceView;
     }
 
+    /**
+     * Resume the drawing canvas when the fragment is resumed.
+     */
     @Override
     public void onResume() {
-        Log.d(TAG, "resuming ..");
-
+        updatePages();
         mEditSurfaceView.onResumeMySurfaceView();
         super.onResume();
     }
 
+    /**
+     * Pause the surface view on fragment pause.
+     */
     @Override
     public void onPause() {
-        Log.d(TAG, "pausing ..");
-
         mEditSurfaceView.onPauseMySurfaceView();
         super.onPause();
     }
 
+    /**
+     * Change the page that is currently being shown.
+     * @param num Page number
+     */
     public void changePage(long num) {
-        Log.e(TAG, "calling change page");
         mEditSurfaceView.changePage(num);
     }
 
+    /**
+     * Add a page to the volume that is currently being edited.
+     */
     public void addPage() {
         mEditSurfaceView.addPage();
-        Log.e(TAG, "added page, refreshing ..");
+        updatePages();
+    }
 
+    /**
+     * Updates the pages fragment in the panel.
+     */
+    public void updatePages(){
         Fragment fragment = getActivity().getFragmentManager().findFragmentById(R.id.container_drawer);
         if (fragment instanceof PagesFragment) {
             ((PagesFragment) fragment).update();
