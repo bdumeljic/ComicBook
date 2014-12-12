@@ -33,7 +33,7 @@ public class Page extends SugarRecord<Page> {
     public void addPanel(Panel pan) {
         pan.setPageId(getId());
         pan.save();
-        mPanels.add(pan);
+        this.mPanels.add(pan);
     }
 
     public void loadPageInfo() {

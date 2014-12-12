@@ -1,7 +1,9 @@
 package com.bdumeljic.comicbook;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +13,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.bdumeljic.comicbook.Models.Project;
+import com.bdumeljic.comicbook.Models.Volume;
+
+import java.util.ArrayList;
 
 /**
  * Activity that controls the editing process. It holds all the sliding drawer fragments used in {@link com.bdumeljic.comicbook.NavigationDrawerFragment} as well as the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
@@ -49,9 +54,11 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     SettingsFragment settings;
 
     /** Project that is currently open and being edited. */
-    public long mProjectId;
+    public long mProjectId = -1;
     /** Volume that is currently open and being edited. */
-    public long mVolId;
+    public long mVolId = -1;
+
+    public Volume volume;
 
     /**
      * Open the project and volume. Set the pages of the sliding drawer {@link com.bdumeljic.comicbook.PagesFragment}.
@@ -68,27 +75,31 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
 
         if (extras != null)
         {
-            mProjectId = extras.getLong(PROJECT);
-            mVolId = extras.getLong(VOLUME);
+            mProjectId = extras.getLong(PROJECT, -1);
+            mVolId = extras.getLong(VOLUME, -1);
+
+            Log.d("EditActivity", "received it" + mProjectId + " " + mVolId);
+
         }
 
-        Project p = Project.find(Project.class, "project_id = ?", String.valueOf(mProjectId)).get(0);
-        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(mVolId + 1) + " " + p.getVolume(mVolId).getTitle());
+        Project p = Project.findById(Project.class, mProjectId);
+        Volume vol = Volume.findById(Volume.class, mVolId);
+
+        Log.d("EditActivity", "after vol pro it" + mProjectId + " " + mVolId);
+
+        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(vol.getVolumeId() + 1) + " " + vol.getTitle());
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
 
 
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, EditFragment.newInstance(mProjectId, mVolId))
-                    .commit();
-        }
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        Log.e(TAG, "getting pages for p: " + mProjectId + " " + mVolId);
 
         pages = PagesFragment.newInstance(mProjectId, mVolId);
         presets = new PagesPresetsFragment();
@@ -96,6 +107,12 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, EditFragment.newInstance(mProjectId, mVolId))
+                    .commit();
+        }
     }
 
 
@@ -160,8 +177,6 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
                     .replace(R.id.container_drawer, fragment)
                     .commit();
         }
-
-        //Toast.makeText(getBaseContext(), "Navigation item selected, number: " + String.valueOf(position), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -182,7 +197,7 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
                 editFragment.getSurfaceView().toggleVisibilityBlack(bool);
                 break;
             case CLEAR:
-                editFragment.getSurfaceView().clearPage();
+                deletePageContentsDialog();
                 break;
             //case SAVE:
               //  editFragment.savePage();
@@ -213,5 +228,28 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         } else {
             editFragment.changePage(num);
         }
+    }
+
+    public void deletePageContentsDialog() {
+        Log.d(TAG, "starting delete contents dialog");
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setMessage(R.id.delete_page_contents)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
+                        editFragment.getSurfaceView().deletePageContents();
+                    }
+                })
+                .create();
+
+        alertDialog.show();
+
     }
 }

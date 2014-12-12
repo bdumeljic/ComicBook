@@ -1,7 +1,9 @@
 package com.bdumeljic.comicbook;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -700,7 +702,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         try {
-            Thread.sleep(50);
+            Thread.sleep(25);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -837,9 +839,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         mCurrentPath = new Path();
 
-        //Panel.deleteAll(Panel.class, "page_id = ?", String.valueOf(currentPage.getId()));
+        isPanelSelected = false;
+        selectedPanel = null;
 
-        // TODO: Ask for confirmation before clearing
         Toast.makeText(getContext(), "Page Cleared", Toast.LENGTH_SHORT).show();
     }
 
@@ -909,6 +911,21 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
     }
 
+    /**
+     * MODEL INTERACTION
+     */
+
+
+    /**
+     * Set the first page upon creating an EditSurfaceView.
+     * Set the project and volume that is being edited.
+     * Followed by the current page that is open.
+     * Load panels if there were any saved.
+     *
+     * @param project Project
+     * @param vol
+     * @param num
+     */
     public void setToFirstPage(long project, long vol, long num) {
         Log.e(TAG, "starting first page");
 
@@ -916,8 +933,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         this.volumeId = vol;
         this.pageNum = num;
 
-        this.volume = Project.findProject(projectId).getVolume(volumeId);
+        this.volume = Volume.findById(Volume.class, volumeId);
         this.currentPage = volume.getPage(pageNum);
+
 
         //loadPageFromDB();
 
@@ -948,44 +966,24 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
             Log.e(TAG, "set panels");
         }
-
     }
 
-    /*public void setBluePaths() {
-        ArrayList<Path> newPaths = currentPage.getBlueLines();
+    public void addPage() {
+        Log.d(TAG, "adding page");
 
-        //mBluePaths = new ArrayList<Path>();
-        if (newPaths != null && !newPaths.isEmpty()) {
-            mBluePaths.addAll(currentPage.getBlueLines());
-        }
-
-
-        //Log.e(TAG, "new list of blue :" + mBluePaths.toString());
-
+        this.volume.addPage();
     }
 
-    public void setPanels() {
-        ArrayList<Panel> newPanels = currentPage.getPanels();
+    public void deletePageContents() {
+        Log.d(TAG, "starting delete contents");
 
-        //mPanels.clear();
-        mPanels = new ArrayList<Panel>();
-        if (newPanels != null && !newPanels.isEmpty()) {
-            for (Panel p : newPanels) {
-                mPanels.add(p);
-            }
-        }
-
-        //Log.e(TAG, "new list of panels :" + mPanels.toString());
-        thread.setRunning(true);
-        postInvalidate();
-
+        Panel.deleteAll(Panel.class, "page_id = ?", String.valueOf(currentPage.getId()));
+        clearPage();
     }
 
-    public void savePage() {
-     // Log.e(TAG, "saving to: " + currentPage.getNumber()  );
-     currentPage.savePage(getContext(), mPanels);
-     Toast.makeText(getContext(), "Saved page", Toast.LENGTH_SHORT).show();
-     }*/
+    /**
+     * PANEL INTERACTION
+     */
 
     /**
      * computation of new defined rect after resizing
@@ -1127,11 +1125,5 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     private void showBorders() {
         borderRect = new Rect(MARGIN, MARGIN, mCanvasWidth - MARGIN, mCanvasHeight - MARGIN);
-    }
-
-    public void addPage() {
-        Log.d(TAG, "adding page");
-
-        this.volume.addPage();
     }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 
 public class Volume extends SugarRecord<Volume> {
     private long id;
+
     public long volumeId;
     private String title;
     private long projectId;
@@ -48,7 +49,7 @@ public class Volume extends SugarRecord<Volume> {
     }
 
     public ArrayList<Page> getPages() {
-        return (ArrayList<Page>) Page.find(Page.class, "volume_id = ?", String.valueOf(getId()));
+        return (ArrayList<Page>) Page.find(Page.class, "volume_id = ?", String.valueOf(this.getId()));
     }
 
     public Page getPage(long num) {

@@ -23,6 +23,7 @@ import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.bdumeljic.comicbook.Models.Page;
 import com.bdumeljic.comicbook.Models.Project;
 import com.bdumeljic.comicbook.Models.Volume;
 
@@ -77,6 +78,8 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
 
         Log.e("PFragment", mProjects.toString());
         Log.e("PFragment", ((ArrayList<Volume>) Volume.listAll(Volume.class)).toString());
+        Log.e("PFragment", ((ArrayList<Page>) Page.listAll(Page.class)).toString());
+
 
 
         if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -170,9 +173,11 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
                 .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Project project = new Project(Project.count(Project.class, null, null), projectTitle.getText().toString(), firstVolTitle.getText().toString());
+                        Project project = new Project(projectTitle.getText().toString());
                         project.save();
 
+                        Volume vol = project.addVolume(firstVolTitle.getText().toString());
+                        vol.addPage();
                         mProjects = (ArrayList<Project>) Project.listAll(Project.class);
                         mAdapter = new ProjectsAdapter(getActivity(), R.layout.list_item_project, mProjects);
                         mGridView.setAdapter(mAdapter);
@@ -192,7 +197,7 @@ public class ProjectFragment extends Fragment implements AbsListView.OnItemClick
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             Project project = mProjects.get(position);
-            long pid = project.getProjectId();
+            long pid = project.getId();
             Log.d("PROJECT", "project clicked id " + pid);
 
             mListener.onFragmentInteraction(pid);

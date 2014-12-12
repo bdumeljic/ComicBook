@@ -54,15 +54,15 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
      * @param projectId Selected project id
      */
     @Override
-    public void onFragmentInteraction(long projectId) {
+    public void onFragmentInteraction(final long projectId) {
         mVolNames = new ArrayList<String>();
 
-        final Project project = Project.find(Project.class, "project_id = ?", String.valueOf(projectId)).get(0);
+        final Project project = Project.findById(Project.class, projectId);
 
 
 
         Log.e("PA", "p id provided " + String.valueOf(projectId) );
-        Log.e("PA", " p id " + String.valueOf(project.getProjectId()));
+        Log.e("PA", " p id " + String.valueOf(project.getId()));
         Log.e("PA", " volumes found " + project.getVolumes().size() );
         Log.e("PA p", "trying to get volumes for project: " + project.toString());
 
@@ -92,6 +92,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                 String title = newVolTitle.getText().toString();
                 mVolNames.add(title);
                 Volume newVol = project.addVolume(title);
+                newVol.addPage();
 
                 newVolTitle.getText().clear();
                 alertDialog.getListView().setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, mVolNames));
@@ -122,10 +123,22 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                     public void onClick(DialogInterface dialog, int which) {
                         // The 'which' argument contains the index position
                         // of the selected item
-                        Volume vol = Volume.find(Volume.class, "title = ?", mVolNames.get(which)).get(0);
+                        Volume vol = null;
+                        ArrayList<Volume> vols = (ArrayList<Volume>) project.getVolumes();
+
+                        Log.d("ProjectActivity", "looking for vol " + mVolNames.get(which));
+                        for (Volume volume : vols) {
+                            if (mVolNames.get(which).equals(volume.getTitle())) {
+                                vol = volume;
+                                Log.d("ProjectActivity", "found it");
+                            }
+                        }
+
+                        Log.d("ProjectActivity", "passing to edit " + projectId + " " + vol.getId());
+
                         Intent editIntent = new Intent(getBaseContext(), EditActivity.class);
-                        editIntent.putExtra(PROJECT, project.getProjectId());
-                        editIntent.putExtra(VOLUME, vol.getVolumeId());
+                        editIntent.putExtra(PROJECT, project.getId());
+                        editIntent.putExtra(VOLUME, vol.getId());
                         startActivity(editIntent);
                     }
                 })

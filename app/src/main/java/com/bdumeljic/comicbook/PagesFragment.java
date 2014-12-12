@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.bdumeljic.comicbook.Models.Page;
 import com.bdumeljic.comicbook.Models.Project;
+import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
 
@@ -35,8 +36,8 @@ public class PagesFragment extends ListFragment {
 
     String TAG = "PagesFragment";
 
-    private long mProject;
-    private long mVolume;
+    private long mProject = -1;
+    private long mVolume = -1;
 
     private OnFragmentInteractionListener mListener;
 
@@ -53,7 +54,9 @@ public class PagesFragment extends ListFragment {
      */
      public static PagesFragment newInstance(long project, long volume) {
         PagesFragment fragment = new PagesFragment();
-        Bundle args = new Bundle();
+         Log.e("pages", "getting pages for arg p: " + project + " " + volume);
+
+         Bundle args = new Bundle();
         args.putLong(PROJECT, project);
         args.putLong(VOLUME, volume);
         fragment.setArguments(args);
@@ -80,11 +83,18 @@ public class PagesFragment extends ListFragment {
             mVolume = getArguments().getLong(VOLUME, -1);
         }
 
-       mPages = Project.findProject(mProject).getVolume(mVolume).getPages();
+        if(mProject > 0 && mVolume > 0) {
+            Log.e(TAG, "getting pages for arg p: " + mProject + " " + mVolume);
 
-        mPagesAdapter = new PagesAdapter(mPages);
-        setListAdapter(mPagesAdapter);
+            Log.e(TAG, "getting pages for p: " + mProject + " " + mVolume);
+            mPages = Volume.findById(Volume.class, mVolume).getPages();
 
+            mPagesAdapter = new PagesAdapter(mPages);
+            setListAdapter(mPagesAdapter);
+            //getListView().invalidate();
+
+            Log.e(TAG, "received pages: " + mPages.toString());
+        }
     }
 
     @Override
@@ -108,20 +118,34 @@ public class PagesFragment extends ListFragment {
     }
 
     public void update() {
-        mPages = Project.findProject(mProject).getVolume(mVolume).getPages();
+        Log.e(TAG, "getting pages for p: " + mProject + " " + mVolume);
 
-        mPagesAdapter = new PagesAdapter(mPages);
-        setListAdapter(mPagesAdapter);
-        getListView().invalidate();
-        getListView().setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        getListView().setStackFromBottom(true);
+        if(mProject > 0 && mVolume > 0) {
+            mPages = Volume.findById(Volume.class, mVolume).getPages();
+
+            mPagesAdapter = new PagesAdapter(mPages);
+            setListAdapter(mPagesAdapter);
+            getListView().invalidate();
+            getListView().setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+            getListView().setStackFromBottom(true);
+
+            Log.e(TAG, "received pages: " + mPages.toString());
+        } else {
+            Log.e(TAG, "nothing to update");
+        }
+
 
     }
 
     @Override
     public void onStart() {
-        setSelection(0);
         super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getListView().invalidate();
     }
 
     @Override
