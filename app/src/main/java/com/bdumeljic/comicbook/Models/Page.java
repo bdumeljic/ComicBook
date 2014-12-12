@@ -1,5 +1,6 @@
 package com.bdumeljic.comicbook.Models;
 
+import android.content.Context;
 import android.graphics.Path;
 import android.util.Log;
 
@@ -8,13 +9,14 @@ import com.google.gson.reflect.TypeToken;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
-import org.json.JSONArray;
-
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 
 public class Page extends SugarRecord<Page> {
@@ -26,9 +28,9 @@ public class Page extends SugarRecord<Page> {
     private String blueLines;
 
     @Ignore
-    private ArrayList<Panel> mPanels = new ArrayList<Panel>();
+    private ArrayList<Panel> mPanelsList;
     @Ignore
-    private ArrayList<Path> mBlueLines = new ArrayList<Path>();;
+    private ArrayList<Path> mBlueLinesList;
     @Ignore
     private int mLayoutPreset = -1;
 
@@ -40,57 +42,27 @@ public class Page extends SugarRecord<Page> {
         this.number = num;
         this.volumeId = volId;
 
+        this.mPanelsList = new ArrayList<Panel>();
+        this.mBlueLinesList = new ArrayList<Path>();
+        this.panels = "";
+        this.blueLines = "";
     }
 
     /*private void addPanel() {
-        mPanels.add("lala");
+        mPanelsList.add("lala");
     }*/
 
-    public void loadPage() {
-        Gson gson = new Gson();
-        Type pathType = new TypeToken<ArrayList<Path>>() {}.getType();
-        Type panelType = new TypeToken<ArrayList<Panel>>() {}.getType();
+    public void loadPageInfo() {
 
-        Log.e("PAGE panels", "p " + panels);
-        Log.e("PAGE bluelines", "b " + blueLines);
 
-        /*if(panels != null && !panels.isEmpty()) {
-            List<Panel> listPanels = gson.fromJson(panels, panelType);
-
-            mPanels.clear();
-            mPanels.addAll(listPanels);
-            Log.e("PAGE", mBlueLines.toString());
-        }*/
-        if(blueLines != null && !blueLines.isEmpty()) {
-            List<Path> listPaths = gson.fromJson(blueLines, pathType);
-
-            mBlueLines.clear();
-            mBlueLines.addAll(listPaths);
-            Log.e("PAGE", mBlueLines.toString());
-        }
-    }
-
-    public void savePage(ArrayList<Panel> panels, ArrayList<Path> blueLines) {
-        Gson gson = new Gson();
-        Type pathType = new TypeToken<ArrayList<Path>>() {}.getType();
-        Type panelType = new TypeToken<ArrayList<Panel>>() {}.getType();
-
-        //String panelsString = gson.toJson(panels, panelType);
-        String blueLinesString = gson.toJson(blueLines, pathType);
-
-        //this.panels = panelsString;
-        this.blueLines = blueLinesString;
-        this.save();
-
-        Page page = Page.find(Page.class, "volume_id = ? and number = ?", new String[]{String.valueOf(volumeId), String.valueOf(number)}).get(0);
-        Log.e("PAGE", page.toString());
+        //Log.e("PAGE", "loaded succesfully, returning");
     }
 
     public ArrayList<Panel> getPanels() {
-        return mPanels;
+        return mPanelsList;
     }
     public ArrayList<Path> getBlueLines() {
-        return mBlueLines;
+        return mBlueLinesList;
     }
 
     public long getNumber() {
@@ -107,6 +79,6 @@ public class Page extends SugarRecord<Page> {
 /*
     @Override
     public String toString() {
-        return "Page of vol: " + volumeId + " num: " + number + " panels " + panels + " blue " + blueLines + " ::: " + mBlueLines.toString() + panels.toString();
+        return "Page of vol: " + volumeId + " num: " + number + " panels " + panels + " blue " + blueLines + " ::: " + mBlueLinesList.toString() + panels.toString();
     }*/
 }

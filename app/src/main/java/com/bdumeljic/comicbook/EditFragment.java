@@ -10,11 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
-
-import com.bdumeljic.comicbook.Models.Page;
-import com.bdumeljic.comicbook.Models.Project;
-import com.bdumeljic.comicbook.Models.Volume;
 
 
 /**
@@ -34,9 +29,6 @@ public class EditFragment extends Fragment {
     private long mProjectId;
     /** Volume being edited */
     private long mVolumeId;
-
-    public Volume volume;
-    public Page currentPage;
 
     /** View that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} */
     private View mDecorView;
@@ -83,9 +75,6 @@ public class EditFragment extends Fragment {
         if (mProjectId < 0 || mVolumeId < 0) {
             getActivity().finish();
         }
-
-        volume = Project.findProject(mProjectId).getVolume(mVolumeId);
-        currentPage = volume.getPage(1);
     }
 
     /**
@@ -161,9 +150,8 @@ public class EditFragment extends Fragment {
                 mEditSurfaceView.setDrawingMode(BLACK);
             }
         });
-        
-        currentPage = volume.getPage(1);
-        currentPage.loadPage();
+
+        mEditSurfaceView.setToFirstPage(mProjectId, mVolumeId, 1);
 
         return view;
     }
@@ -209,19 +197,13 @@ public class EditFragment extends Fragment {
         super.onPause();
     }
 
-    public void changePage(long num) {
-        currentPage = volume.getPage(num);
-        currentPage.loadPage();
-        mEditSurfaceView.setBluePaths(currentPage.getBlueLines());
-        mEditSurfaceView.setPanels(currentPage.getPanels());
-
-        Toast.makeText(getActivity(), "changed page", Toast.LENGTH_SHORT).show();
-
+    public void savePage() {
+        Log.e(TAG, "calling save page");
+        //mEditSurfaceView.savePage();
     }
 
-    public void savePage() {
-        Log.e(TAG, mEditSurfaceView.mBluePaths.toString());
-        currentPage.savePage(mEditSurfaceView.mPanels, mEditSurfaceView.mBluePaths);
-        Toast.makeText(getActivity(), "Saved page", Toast.LENGTH_SHORT).show();
+    public void changePage(long num) {
+        Log.e(TAG, "calling change page");
+        mEditSurfaceView.changePage(num);
     }
 }

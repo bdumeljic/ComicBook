@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,12 +15,18 @@ import com.bdumeljic.comicbook.Models.Project;
 /**
  * Activity that controls the editing process. It holds all the sliding drawer fragments used in {@link com.bdumeljic.comicbook.NavigationDrawerFragment} as well as the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
  */
-public class EditActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, PagesPresetsFragment.OnFragmentInteractionListener, PagesFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
+public class EditActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        PagesPresetsFragment.OnFragmentInteractionListener,
+        SettingsFragment.OnFragmentInteractionListener,
+        PagesFragment.OnFragmentInteractionListener {
 
-    /**
-     * Fragment managing the selection of the current page, page layout preset selection and drawing settings.
-     */
+
+/**
+ * Fragment managing the selection of the current page, page layout preset selection and drawing settings.
+ */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+
+    String TAG = "EditActivity";
 
     public final static String PROJECT = "param_project";
     public final static String VOLUME = "param_volume";
@@ -113,11 +120,6 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
         return super.onOptionsItemSelected(item);
     }
 
-    public void onPresetSelected(int position) {
-        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-        editFragment.getSurfaceView().computePreset(position);
-    }
-
     /**
      * Manage the fragment changes in the sliding drawer.
      * @param position
@@ -163,16 +165,6 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     }
 
     /**
-     * Called upon interaction with pages fragment.
-     * @param num
-     */
-    @Override
-    public void onFragmentInteraction(long num) {
-        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-        editFragment.changePage(num);
-    }
-
-    /**
      * Manage the interactions that happened in the {@link com.bdumeljic.comicbook.NavigationDrawerFragment}.
      *
      * @param type Setting that was changed
@@ -196,12 +188,25 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
                 editFragment.savePage();
                 break;
         }
-
-
     }
 
-    @Override
-    public void onFragmentInteraction(String id) {
+    /**
+     * On preset selected.
+     * @param position
+     */
+    public void onPresetSelected(int position) {
+        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
+        editFragment.getSurfaceView().computePreset(position);
+    }
 
+    /**
+     * Called upon interaction with pages fragment.
+     * @param num
+     */
+    @Override
+    public void onFragmentInteraction(long num) {
+        Log.e(TAG, "starting change page with num: " + num);
+        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
+        editFragment.changePage(num);
     }
 }

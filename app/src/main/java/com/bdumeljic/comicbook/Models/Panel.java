@@ -6,7 +6,8 @@ import android.graphics.Rect;
 
 public class Panel{
     Context mContext;
-    Point start;
+    int startX;
+    int startY;
     int width;
     int height;
     int id;
@@ -16,18 +17,19 @@ public class Panel{
     /**
      * Create a new panel
      *
-     * @param point Starting point of the pane
+     * @param pointX Starting point x value of the pane
+     * @param pointY Starting point y value of the pane
      * @param height Height of the panel
      * @param width Width of the panel
-     * @param id Panel ID
      */
-    public Panel(Context context, Point point, int height, int width) {
+    public Panel(Context context, int pointX, int pointY, int height, int width) {
         this.id = count++;
         mContext = context;
-        this.start = point;
+        this.startX = pointX;
+        this.startY = pointY;
         this.height = height;
         this.width = width;
-        this.rect = new Rect(point.x, point.y, point.x + width, point.y + height);
+        this.rect = new Rect(pointX, pointY, pointX + width, pointY + height);
     }
 
     /**
@@ -77,14 +79,14 @@ public class Panel{
      * @return X value of the starting point
      */
     public int getX() {
-        return start.x;
+        return startX;
     }
 
     /**
      * Set the x value of the panel's starting point
      */
     public void setX(int x) {
-        start.x = x;
+        startX = x;
     }
 
     /**
@@ -92,14 +94,14 @@ public class Panel{
      * @return Y value of the starting point
      */
     public int getY() {
-        return start.y;
+        return startY;
     }
 
     /**
      * Set the y value of the panel's starting point
      */
     public void setY(int y) {
-        start.y = y;
+        startX = y;
     }
     /**
      * Get the rect defined by Panel
