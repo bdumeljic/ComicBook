@@ -23,5 +23,15 @@
         <item name="android:textColorHighlight">@android:color/white</item>
     </style>
 
+    <style name="big_flat_button" parent="Base.TextAppearance.AppCompat.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/big_flat_button_height</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_centerHorizontal">true</item>
+    </style>
+
 
 </resources>

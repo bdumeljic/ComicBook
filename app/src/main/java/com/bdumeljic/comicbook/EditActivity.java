@@ -184,9 +184,9 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
             case CLEAR:
                 editFragment.getSurfaceView().clearPage();
                 break;
-            case SAVE:
-                editFragment.savePage();
-                break;
+            //case SAVE:
+              //  editFragment.savePage();
+               // break;
         }
     }
 
@@ -207,6 +207,11 @@ public class EditActivity extends ActionBarActivity implements NavigationDrawerF
     public void onFragmentInteraction(long num) {
         Log.e(TAG, "starting change page with num: " + num);
         EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-        editFragment.changePage(num);
+
+        if(num < 0) {
+            editFragment.addPage();
+        } else {
+            editFragment.changePage(num);
+        }
     }
 }

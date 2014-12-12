@@ -197,13 +197,18 @@ public class EditFragment extends Fragment {
         super.onPause();
     }
 
-    public void savePage() {
-        Log.e(TAG, "calling save page");
-        //mEditSurfaceView.savePage();
-    }
-
     public void changePage(long num) {
         Log.e(TAG, "calling change page");
         mEditSurfaceView.changePage(num);
+    }
+
+    public void addPage() {
+        mEditSurfaceView.addPage();
+        Log.e(TAG, "added page, refreshing ..");
+
+        Fragment fragment = getActivity().getFragmentManager().findFragmentById(R.id.container_drawer);
+        if (fragment instanceof PagesFragment) {
+            ((PagesFragment) fragment).update();
+        }
     }
 }

@@ -39,10 +39,6 @@ public class Volume extends SugarRecord<Volume> {
     }
 
     public void addPage() {
-        //Select numPagesQuery = Select.from(Page.class)
-          //      .where(Condition.prop("volume_id").eq(getId()));
-        //long numberPagesInVol = numPagesQuery.count();
-        //int pageNum = (int) numberPagesInVol;
         int pageNum = (int) Page.count(Page.class, "volume_id = ?", new String[]{String.valueOf(getId())});
         Page page = new Page(pageNum + 1, getId());
         page.save();

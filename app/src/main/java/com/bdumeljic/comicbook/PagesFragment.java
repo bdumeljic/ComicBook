@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -40,6 +42,7 @@ public class PagesFragment extends ListFragment {
 
     /** Adapter holding the pages. */
     PagesAdapter mPagesAdapter;
+    ArrayList<Page> mPages;
 
     /**
      * Create a new instance of the fragment with the provided project ID and volume ID.
@@ -77,10 +80,41 @@ public class PagesFragment extends ListFragment {
             mVolume = getArguments().getLong(VOLUME, -1);
         }
 
-        ArrayList<Page> mPages = Project.findProject(mProject).getVolume(mVolume).getPages();
+       mPages = Project.findProject(mProject).getVolume(mVolume).getPages();
 
         mPagesAdapter = new PagesAdapter(mPages);
         setListAdapter(mPagesAdapter);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_pages, container, false);
+
+        Button button = (Button) view.findViewById(R.id.add_new_page_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    Log.e(TAG, "page selected: " + -1);
+                    mListener.onFragmentInteraction(-1);
+                }
+            }
+        });
+
+        return view;
+    }
+
+    public void update() {
+        mPages = Project.findProject(mProject).getVolume(mVolume).getPages();
+
+        mPagesAdapter = new PagesAdapter(mPages);
+        setListAdapter(mPagesAdapter);
+        getListView().invalidate();
+        getListView().setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        getListView().setStackFromBottom(true);
 
     }
 

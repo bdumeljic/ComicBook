@@ -10,5 +10,6 @@
     <dimen name="flat_button_height">36dp</dimen>
     <dimen name="keyline_internal_padding">8dp</dimen>
     <dimen name="button_height">14sp</dimen>
+    <dimen name="big_flat_button_height">56dp</dimen>
 
 </resources>

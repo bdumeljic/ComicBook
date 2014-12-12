@@ -700,7 +700,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         try {
-            thread.sleep(50);
+            Thread.sleep(50);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -837,6 +837,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         mCurrentPath = new Path();
 
+        //Panel.deleteAll(Panel.class, "page_id = ?", String.valueOf(currentPage.getId()));
+
         // TODO: Ask for confirmation before clearing
         Toast.makeText(getContext(), "Page Cleared", Toast.LENGTH_SHORT).show();
     }
@@ -917,7 +919,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         this.volume = Project.findProject(projectId).getVolume(volumeId);
         this.currentPage = volume.getPage(pageNum);
 
-        loadPageFromDB();
+        //loadPageFromDB();
 
         Toast.makeText(getContext(), "First page", Toast.LENGTH_SHORT).show();
     }
@@ -1126,5 +1128,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     private void showBorders() {
         borderRect = new Rect(MARGIN, MARGIN, mCanvasWidth - MARGIN, mCanvasHeight - MARGIN);
     }
-    
+
+    public void addPage() {
+        Log.d(TAG, "adding page");
+
+        this.volume.addPage();
+    }
 }

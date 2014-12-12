@@ -21,9 +21,6 @@ public class Project extends SugarRecord<Project> {
         this.title = title;
         Volume first = addVolume(volume);
         first.addPage();
-        first.addPage();
-        first.addPage();
-
     }
 
     public String getProjectName() {
