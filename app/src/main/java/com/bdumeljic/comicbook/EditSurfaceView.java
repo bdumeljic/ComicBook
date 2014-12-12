@@ -238,8 +238,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         mSelectedPaint = new Paint();
         initPaint(mSelectedPaint);
-        mSelectedPaint.setStyle(Paint.Style.FILL);
-        mSelectedPaint.setColor(getResources().getColor(R.color.pink_alpha));
+        mSelectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mSelectedPaint.setColor(getResources().getColor(R.color.accent_lighter));
         mSelectedPaint.setStrokeWidth(6f);
 
         gridLinePaint = new Paint();
@@ -280,8 +280,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN + heightRect + DISTPANELS, screenWidth - MARGIN, screenHeight - MARGIN));
 
                 for (int i = 0; i < 4; i++) {
-                    Panel panel =  new Panel(this.mContext, rects.get(i).left, rects.get(i).top, rects.get(i).height(), rects.get(i).width());
+                    Panel panel =  new Panel(rects.get(i).left, rects.get(i).top, rects.get(i).height(), rects.get(i).width());
                     mPanels.add(i, panel);
+                    currentPage.addPanel(panel);
                     mDrawings.add(new Pair(panel, PANEL));
                 }
                 break;
@@ -295,8 +296,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 rects.add(new Rect(MARGIN, screenHeight - MARGIN - heightRect, screenWidth - MARGIN, MARGIN ));
 
                 for (int i = 0; i < 4; i++) {
-                    Panel panel =  new Panel(this.mContext, rects.get(i).left, rects.get(i).top, heightRect, rects.get(i).width());
+                    Panel panel =  new Panel(rects.get(i).left, rects.get(i).top, heightRect, rects.get(i).width());
                     mPanels.add(i, panel);
+                    currentPage.addPanel(panel);
                     mDrawings.add(new Pair(panel, PANEL));
                 }
                 break;
@@ -309,8 +311,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 rects.add(new Rect(MARGIN + widthRect + DISTPANELS, MARGIN + 2*heightRect + DISTPANELS, screenWidth - MARGIN, screenHeight - MARGIN));
 
                 for (int i = 0; i < 3; i++) {
-                    Panel panel =  new Panel(this.mContext, rects.get(i).left, rects.get(i).top, rects.get(i).height(), rects.get(i).width());
+                    Panel panel =  new Panel(rects.get(i).left, rects.get(i).top, rects.get(i).height(), rects.get(i).width());
                     mPanels.add(i, panel);
+                    currentPage.addPanel(panel);
                     mDrawings.add(new Pair(panel, PANEL));                }
                 break;
         }
@@ -507,6 +510,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             case MotionEvent.ACTION_UP:
                 if(selectedPanel == null){
                     isPanelSelected = false;
+                } else {
+                    selectedPanel.save();
                 }
                 break;
         }
@@ -641,9 +646,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
             // Draw the older blue paths.
             for (Path pBlue : mBluePaths) {
-               //Loge(TAG, "blue path" + pBlue.toString() + " paint " + mBluePaint.toString() + " ca " + canvas);
                 canvas.drawPath(pBlue, mBluePaint);
-               //Loge(TAG, "blue path" + pBlue.toString());
             }
 
             //Log.e(TAG, "done with blue paths");
@@ -651,6 +654,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             // Draw the black panels if the black ink is visible.
             if(visibilityBlack) {
                 for (Panel panel : mPanels) {
+                    Log.d(TAG, "" + panel + " " + panel.getDefinedRect() + " paint " + mBlackPaint );
                     canvas.drawRect(panel.getDefinedRect(),  mBlackPaint);
                 }
             }
@@ -664,15 +668,17 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             
             // If a panel is selected redraw it with the selected paint.
             if (isPanelSelected && selectedPanel != null) {
-                canvas.drawRect(selectedPanel.getDefinedRect(),  mSelectedPaint);
                 canvas.drawRect(borderRect, gridLinePaint);
-                for(Handle ball : resizeHandles){
-                    canvas.drawBitmap(ball.getBitmap(),ball.getX(),ball.getY(), mSelectedPaint);
-                }
+
                 canvas.drawLine(MARGIN, selectedPanel.getDefinedRect().bottom , this.getWidth(), selectedPanel.getDefinedRect().bottom , gridLinePaint);
                 canvas.drawLine(selectedPanel.getDefinedRect().left, MARGIN, selectedPanel.getDefinedRect().left, this.getHeight() - MARGIN, gridLinePaint);
                 canvas.drawLine(MARGIN, selectedPanel.getDefinedRect().top, this.getWidth() - MARGIN, selectedPanel.getDefinedRect().top, gridLinePaint);
                 canvas.drawLine(selectedPanel.getDefinedRect().right, MARGIN, selectedPanel.getDefinedRect().right, this.getHeight() - MARGIN, gridLinePaint);
+
+                canvas.drawRect(selectedPanel.getDefinedRect(),  mSelectedPaint);
+                for(Handle ball : resizeHandles){
+                    canvas.drawBitmap(ball.getBitmap(),ball.getX(),ball.getY(), mSelectedPaint);
+                }
                 Log.d(TAG, "there is a selected panel");
             }
             
@@ -691,6 +697,12 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                     canvas.drawPath(pBlue, mBluePaint);
                 }
             }
+        }
+
+        try {
+            thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -747,7 +759,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             top = top > mBlackPoints.get(i).y ? mBlackPoints.get(i).y:top;
         }
         if(width > 0 && height > 0) {
-            Panel panel = new Panel(getContext(), left, top, (int) height, (int) width);
+            Panel panel = new Panel(left, top, (int) height, (int) width);
             for(Panel oldPanel : mPanels){
 
                 Rect oldPanelRect = oldPanel.getDefinedRect();
@@ -783,6 +795,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             }
 
             mPanels.add(panel);
+            currentPage.addPanel(panel);
             mDrawings.add(new Pair(panel, PANEL));
             Log.d(TAG, "rect added");
             mBlackPoints.clear();
@@ -904,18 +917,18 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         this.volume = Project.findProject(projectId).getVolume(volumeId);
         this.currentPage = volume.getPage(pageNum);
 
-        //loadPageFromDB();
+        loadPageFromDB();
 
         Toast.makeText(getContext(), "First page", Toast.LENGTH_SHORT).show();
     }
 
     public void changePage(long num) {
         Log.e(TAG, "started changing page");
-        //clearPage();
+        clearPage();
         this.pageNum = num;
         this.currentPage = volume.getPage(pageNum);
 
-        //loadPageFromDB();
+        loadPageFromDB();
 
         Toast.makeText(getContext(), "Changed page", Toast.LENGTH_SHORT).show();
     }
@@ -924,7 +937,16 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.e(TAG, "started loading page drawings");
 
         Log.e(TAG, "starting loading");
-        new PageLoader(currentPage, this).execute();
+        //new PageLoader(currentPage, this).execute();
+
+        ArrayList<Panel> panels = currentPage.getPanels();
+        if (panels != null && !panels.isEmpty()) {
+            mPanels = panels;
+            setDrawingMode(BLACK);
+
+            Log.e(TAG, "set panels");
+        }
+
     }
 
     /*public void setBluePaths() {
@@ -1005,7 +1027,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             setHandlesToRectBounds(selectedPanel.getDefinedRect());
             prevX = touchX;
             prevY = touchY;
-
+            selectedPanel.save();
         }
 
     }
