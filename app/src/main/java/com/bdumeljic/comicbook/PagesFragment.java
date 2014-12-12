@@ -77,7 +77,7 @@ public class PagesFragment extends ListFragment {
             mVolume = getArguments().getLong(VOLUME, -1);
         }
 
-        ArrayList<Page> mPages = (ArrayList<Page>) Project.findProject(mProject).getVolume(mVolume).getPages();
+        ArrayList<Page> mPages = Project.findProject(mProject).getVolume(mVolume).getPages();
 
         mPagesAdapter = new PagesAdapter(mPages);
         setListAdapter(mPagesAdapter);

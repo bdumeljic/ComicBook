@@ -7,6 +7,7 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Volume extends SugarRecord<Volume> {
@@ -50,8 +51,8 @@ public class Volume extends SugarRecord<Volume> {
 
     }
 
-    public List<Page> getPages() {
-        return Page.find(Page.class, "volume_id = ?", String.valueOf(getId()));
+    public ArrayList<Page> getPages() {
+        return (ArrayList<Page>) Page.find(Page.class, "volume_id = ?", String.valueOf(getId()));
     }
 
     public Page getPage(long num) {

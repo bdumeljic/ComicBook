@@ -1,5 +1,6 @@
 package com.bdumeljic.comicbook;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,7 +20,6 @@ import com.bdumeljic.comicbook.Models.Project;
 import com.bdumeljic.comicbook.Models.Volume;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Custom {@link android.view.SurfaceView} used for drawing the page layout. One surface is one page in a comic book volume.
@@ -27,8 +27,6 @@ import java.util.List;
 public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private String TAG = "EditSurfaceView";
-
-    boolean surfaceCreated;
 
     public Page currentPage;
     public Volume volume;
@@ -43,6 +41,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     class EditSurfaceThread extends Thread {
 
         private final SurfaceHolder mSurfaceHolder;
+        private EditSurfaceView mEditSurfaceView;
 
         /** Variable that keeps track if the surface thread is running or not. */
         private boolean mRun = false;
@@ -51,10 +50,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         private int mCanvasHeight = 1;
         private int mCanvasWidth = 1;
 
-        public EditSurfaceThread(SurfaceHolder surfaceHolder, Context context) {
+        public EditSurfaceThread(SurfaceHolder surfaceHolder, EditSurfaceView surfaceView) {
             // get handles to some important objects
-            mSurfaceHolder = surfaceHolder;
-            mContext = context;
+            this.mSurfaceHolder = surfaceHolder;
+            this.mEditSurfaceView = surfaceView;
         }
 
         /**
@@ -63,35 +62,32 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
          * @param running Boolean value
          */
         public void setRunning(boolean running) {
-            // Do not allow mRun to be modified while any canvas operations
-            // are potentially in-flight. See doDraw().
-            if(!mRun && running) {
-                Log.d(TAG, "UNpausing .." );
-
-            } else if(mRun && !running) {
-                Log.d(TAG, "PPPausing .." );
-            }
-
             Log.d(TAG, "set running to .." + running);
-            synchronized (mSurfaceHolder) {
-                synchronized (mRunLock) {
-                    mRun = running;
-                }
-            }
+            mRun = running;
         }
 
+        @SuppressLint("WrongCall")
         @Override
         public void run() {
+            if (mRun) {
+                Log.i(TAG, "THREAD start running");
+            }
+
             while (mRun) {
                 Canvas canvas = null;
                 try {
-                    canvas = mSurfaceHolder.lockCanvas(null);
+                    canvas = mSurfaceHolder.lockCanvas();
                     synchronized (mSurfaceHolder) {
 
                         // If mRun has been toggled false, inhibit canvas operations.
-                        synchronized (mRunLock) {
-                            if (mRun) doDraw(canvas);
-                        }
+                      //  synchronized (mRunLock) {
+                            if (mRun) {
+                                Log.i(TAG, "THREAD start draw");
+                                //invalidate();
+                                mEditSurfaceView.onDraw(canvas);
+                                postInvalidate();
+                      //      }
+                            }
 
                     }
                 } finally {
@@ -105,17 +101,11 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             }
         }
 
-        private void doDraw(Canvas canvas) {
-
-             //  Log.i(TAG, "DO DRAW IN THREAD CALLED");
-        }
-
         public void setSurfaceSize(int width, int height) {
             // synchronized to make sure these all change atomically
             synchronized (mSurfaceHolder) {
                 mCanvasWidth = width;
                 mCanvasHeight = height;
-
             }
         }
     }
@@ -167,7 +157,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     public EditSurfaceView(Context context) {
         super(context);
-        surfaceCreated = true;
 
         init(context);
     }
@@ -187,12 +176,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * @param context
      */
     public void init(Context context) {
-
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
 
-        // create thread only; it's started in surfaceCreated()
-        thread = new EditSurfaceThread(surfaceHolder, context);
+        thread = new EditSurfaceThread(surfaceHolder, this);
         setFocusable(true);
 
         setDrawingMode(BLUE);
@@ -217,6 +204,8 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         mSelectedPaint.setStrokeWidth(6f);
 
         mCurrentPath = new Path();
+
+        thread.setRunning(true);
 
     }
 
@@ -250,7 +239,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         }
 
         Log.d(TAG, "switched to drawing in " + mode);
-        invalidate();
+        //invalidate();
     }
 
     /**
@@ -285,7 +274,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         }
 
-        invalidate();
+        //inn();
         Log.d(TAG, "toggle blue to  " + String.valueOf(visibilityBlue));
     }
 
@@ -304,7 +293,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         }
 
-        invalidate();
+        //invalidate();
         Log.d(TAG, "toggle black to  " + String.valueOf(visibilityBlack));
     }
 
@@ -342,11 +331,11 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 touch_start(x, y);
 
                 // Redraw the view
-                invalidate();
+                //invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
                 touch_move(x, y);
-                invalidate();
+                //invalidate();
                 break;
             case MotionEvent.ACTION_UP:
                 // Check for a double tap used for panel selection if in BLACK drawing mode
@@ -370,7 +359,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
                 }
 
                 touch_up();
-                invalidate();
+                //invalidate();
                 break;
         }
 
@@ -457,7 +446,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.d("", "undonepathsize:::" + undonePaths.size());
         if (mBluePaths.size() > 0) {
             undonePaths.add(mBluePaths.remove(mBluePaths.size() - 1));
-            invalidate();
+            //invalidate();
 
             Toast.makeText(getContext(), "UNDO", Toast.LENGTH_SHORT).show();
         } else {
@@ -473,7 +462,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.e("", "undonepathsize:::" + undonePaths.size());
         if (undonePaths.size() > 0) {
             mBluePaths.add(undonePaths.remove(undonePaths.size() - 1));
-            invalidate();
+            //invalidate();
 
             Toast.makeText(getContext(), "REDO", Toast.LENGTH_SHORT).show();
         } else {
@@ -486,9 +475,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
      * @param canvas Canvas that is being drawn on
      */
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        Log.e(TAG, "started on draw");
+        Log.e(TAG, "started onDraw");
         if (isDrawingModeBlue()) {
             Log.e(TAG, "drawing in blue");
 
@@ -501,8 +488,7 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
             // Draw the older blue paths.
             for (Path pBlue : mBluePaths) {
-                Log.e(TAG, "blue path" + pBlue.toString() + " paint " + mBluePaint);
-
+                Log.e(TAG, "blue path" + pBlue.toString() + " paint " + mBluePaint.toString() + " ca " + canvas);
                 canvas.drawPath(pBlue, mBluePaint);
                 Log.e(TAG, "blue path" + pBlue.toString());
             }
@@ -531,7 +517,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             }
 
             // Add the latest path.
-            canvas.drawPath(mCurrentPath, mBlackPaint);
+            if(!mCurrentPath.isEmpty()) {
+                canvas.drawPath(mCurrentPath, mBlackPaint);
+            }
 
             // Add older paths.
             for (Path pathBlack : mBlackPaths) {
@@ -657,33 +645,17 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
         mCurrentPath = new Path();
 
-        invalidate();
+        //invalidate();
 
         // TODO: Ask for confirmation before clearing
         Toast.makeText(getContext(), "Page Cleared", Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Used to (re)start the surface thread
-     * @param holder
-     */
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "surface created.." + thread.getState().toString());
-
-        if (thread.getState() == Thread.State.TERMINATED){
-            Log.d(TAG, "surface created.. terminated .. restarting");
-
-            thread = new EditSurfaceThread(getHolder(), getContext());
-            thread.setRunning(true);
-            thread.start();
-        } else {
-            Log.d(TAG, "surface created.. new ..");
-
-            thread.setRunning(true);
-
-            // TODO set the initial page to page 1 of vol
-        }
+        thread.setRunning(true);
+        thread.start();
     }
 
     /**
@@ -705,7 +677,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.d(TAG, "surfaceDestroyed");
-        surfaceCreated = false;
         thread.setRunning(false);
     }
 
@@ -713,7 +684,12 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         Log.d(TAG, "window lost focus..");
 
-        if (!hasWindowFocus) thread.setRunning(false);
+        /*if (!hasWindowFocus) {
+            thread.setRunning(false);
+        } else {
+            thread.setRunning(true);
+            thread.start();
+        }*/
     }
 
     /**
@@ -722,7 +698,10 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void onResumeMySurfaceView(){
         Log.d(TAG, "resuming thread..");
 
-        surfaceCreated(getHolder());
+        thread = new EditSurfaceThread(getHolder(), this);
+        //thread.setRunning(true);
+        //thread.start();
+
     }
 
     /**
@@ -736,7 +715,6 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         try {
             Log.d(TAG, "trying to destroy surface");
             thread.join();
-            //       retry = false;
         } catch (InterruptedException e) {
         }
     }
@@ -757,7 +735,9 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     }
 
     public void changePage(long num) {
+        thread.setRunning(false);
         Log.e(TAG, "started changing page");
+        //clearPage();
         this.pageNum = num;
         this.currentPage = volume.getPage(pageNum);
 
@@ -770,33 +750,17 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         Log.e(TAG, "started loading page drawings");
 
         Log.e(TAG, "starting loading");
-        //this.currentPage.loadPageInfo();
         new PageLoader(currentPage, this).execute();
-/*
-        Log.e(TAG, "starting setting blue paths");
-        setBluePaths();
-        Log.e(TAG, "starting setting panels");
-        setPanels();
-
-        Log.e(TAG, "redrawing");
-        invalidate();
-
-        Log.e(TAG, "done showing page: " + currentPage.getId() + " of v " + currentPage.getVolumeId()  + volume.getVolumeId() + " of p " + volume.getProjectId());
-
-
-        Toast.makeText(getContext(), "Loaded page", Toast.LENGTH_SHORT).show();
-        */
     }
 
     public void setBluePaths() {
         ArrayList<Path> newPaths = this.currentPage.getBlueLines();
 
-        mBluePaths.clear();
+        //mBluePaths = new ArrayList<Path>();
         if (newPaths != null && !newPaths.isEmpty()) {
-            for (Path line : newPaths) {
-                mBluePaths.add(line);
-            }
+            //mBluePaths.addAll(currentPage.getBlueLines());
         }
+
 
         Log.e(TAG, "new list of blue :" + mBluePaths.toString());
 
@@ -805,20 +769,23 @@ public class EditSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     public void setPanels() {
         ArrayList<Panel> newPanels = this.currentPage.getPanels();
 
-        mPanels.clear();
+        //mPanels.clear();
+        //mPanels = new ArrayList<Panel>();
         if (newPanels != null && !newPanels.isEmpty()) {
             for (Panel p : newPanels) {
-                mPanels.add(p);
+                //mPanels.add(p);
             }
         }
 
         Log.e(TAG, "new list of panels :" + mPanels.toString());
+        thread.setRunning(true);
+        postInvalidate();
 
     }
 
     public void savePage() {
         Log.e(TAG, "saving to: " + currentPage.getNumber()  );
-        this.currentPage.savePage(mPanels, mBluePaths);
+        currentPage.savePage(mPanels, mBluePaths);
         Toast.makeText(getContext(), "Saved page", Toast.LENGTH_SHORT).show();
     }
 }

@@ -34,11 +34,12 @@ public class PageLoader extends AsyncTask<Void, Void, EditSurfaceView> {
     protected void onPostExecute(EditSurfaceView editSurfaceView) {
         super.onPostExecute(editSurfaceView);
 
+        //mEditSurfaceView.getThread().setRunning(true);
+
         mEditSurfaceView.setBluePaths();
         mEditSurfaceView.setPanels();
 
-        mEditSurfaceView.getThread().setRunning(true);
-        mEditSurfaceView.invalidate();
+       // mEditSurfaceView.invalidate();
 
         Log.e(TAG, "done loading");
 

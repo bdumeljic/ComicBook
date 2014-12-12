@@ -58,11 +58,11 @@ public class Page extends SugarRecord<Page> {
 
             List<Panel> listPanels = gson.fromJson(panels, panelType);
 
-            this.mPanelsList = new ArrayList<Panel>();
-            for (Panel p : listPanels) {
+            mPanelsList = new ArrayList<Panel>();
+            /*for (Panel p : listPanels) {
                 mPanelsList.add(p);
-            }
-            //mPanelsList.addAll(listPanels);
+            }*/
+            mPanelsList.addAll(listPanels);
             Log.e("PAGE", "array of panels: " + mPanelsList.toString());
         }
 
@@ -71,11 +71,11 @@ public class Page extends SugarRecord<Page> {
         if(blueLines != null && !blueLines.isEmpty()) {
             List<Path> listPaths = gson.fromJson(blueLines, pathType);
 
-            this.mBlueLinesList = new ArrayList<Path>();
-            for (Path p : listPaths) {
+            mBlueLinesList = new ArrayList<Path>();
+            /*for (Path p : listPaths) {
                 mBlueLinesList.add(p);
-            }
-            //mBlueLinesList.addAll(listPaths);
+            }*/
+            mBlueLinesList.addAll(listPaths);
             Log.e("PAGE", "array of paths: " + mBlueLinesList.toString());
         }
 

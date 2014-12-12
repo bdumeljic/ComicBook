@@ -92,7 +92,7 @@ public class ProjectActivity extends ActionBarActivity implements ProjectFragmen
                 String title = newVolTitle.getText().toString();
                 mVolNames.add(title);
                 Volume newVol = project.addVolume(title);
-                newVol.addPage();
+
                 newVolTitle.getText().clear();
                 alertDialog.getListView().setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, mVolNames));
             }
