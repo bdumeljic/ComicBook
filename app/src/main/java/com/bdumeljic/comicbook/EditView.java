@@ -1,7 +1,9 @@
 package com.bdumeljic.comicbook;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -14,6 +16,13 @@ import android.widget.Toast;
  */
 public class EditView extends View {
     private String TAG = "EditView";
+
+    //canvas
+    private Canvas drawCanvas;
+    //canvas bitmap
+    private Bitmap canvasBitmap;
+
+    private Paint canvasPaint = new Paint(Paint.DITHER_FLAG);
 
     EditActivity controller;
 
@@ -32,19 +41,28 @@ public class EditView extends View {
         this.controller = (EditActivity) context;
     }
 
+    //size assigned to view
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        drawCanvas = new Canvas(canvasBitmap);
+    }
+
     public void onDraw(Canvas canvas) {
-        //Log.d(TAG, "drawing");
 
-        Log.d(TAG, "drawing: currentpath " + controller.getModel().currentPath + " paint " + controller.getModel().blackPaint);
-
+        canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
         // Add the latest path.
         canvas.drawPath(controller.getModel().currentPath, controller.getModel().blackPaint);
 
-        Log.d(TAG, "drawing: paths " + controller.getModel().blackPaths + " paint " + controller.getModel().blackPaint);
+        if(controller.getModel().mLineEnd != null && controller.getModel().mLineStart != null){
+            canvas.drawLine(controller.getModel().mLineStart.x, controller.getModel().mLineStart.y, controller.getModel().mLineEnd.x, controller.getModel().mLineEnd.y, controller.getModel().blackPaint);
+            controller.getModel().mLineEnd = null;
+            controller.getModel().mLineStart = null;
+        }
 
-        // Add older paths.
-        for (Path pathBlack : controller.getModel().blackPaths) {
-            canvas.drawPath(pathBlack, controller.getModel().blackPaint);
+        if(controller.getModel().mCircleCenter != null && controller.getModel().mCircleRadius != -1){
+           canvas.drawCircle(controller.getModel().mCircleCenter.x, controller.getModel().mCircleCenter.y, controller.getModel().mCircleRadius, controller.getModel().blackPaint);
         }
 
     }

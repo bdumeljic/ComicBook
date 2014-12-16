@@ -4,6 +4,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -18,6 +20,12 @@ public class DrawModel {
     Path currentPath;
 
     static Paint blackPaint, selectedPaint;
+
+    public Point mLineStart;
+    public Point mLineEnd;
+
+    public Point mCircleCenter;
+    public float mCircleRadius = -1;
 
     public DrawModel() {
         currentPath = new Path();
@@ -77,6 +85,7 @@ public class DrawModel {
     public void touch_start(float x, float y) {
         currentPath.reset();
         currentPath.moveTo(x, y);
+        mLineStart = new Point((int)x, (int)y);
         mX = x;
         mY = y;
     }
@@ -102,7 +111,14 @@ public class DrawModel {
     public void touch_up() {
         currentPath.lineTo(mX, mY);
         blackPaths.add(currentPath);
+        mLineEnd = new Point((int)mX, (int)mY);
 
         currentPath = new Path();
+    }
+
+    public void computeCircle(RectF bounds){
+        mCircleCenter = new Point ((int)bounds.centerX(), (int)bounds.centerY());
+
+        mCircleRadius = bounds.height() > bounds.width() ? bounds.width()/2 : bounds.height()/2;
     }
 }
