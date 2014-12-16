@@ -17,13 +17,6 @@ import android.widget.Toast;
 public class EditView extends View {
     private String TAG = "EditView";
 
-    //canvas
-    private Canvas drawCanvas;
-    //canvas bitmap
-    private Bitmap canvasBitmap;
-
-    private Paint canvasPaint = new Paint(Paint.DITHER_FLAG);
-
     EditActivity controller;
 
     public EditView(Context context) {
@@ -41,19 +34,11 @@ public class EditView extends View {
         this.controller = (EditActivity) context;
     }
 
-    //size assigned to view
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        drawCanvas = new Canvas(canvasBitmap);
-    }
-
     public void onDraw(Canvas canvas) {
-
-        canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
-        // Add the latest path.
         canvas.drawPath(controller.getModel().currentPath, controller.getModel().blackPaint);
+        for (Path pathBlack : controller.getModel().blackPaths) {
+            //canvas.drawPath(pathBlack, controller.getModel().blackPaint);
+        }
 
         if(controller.getModel().mLineEnd != null && controller.getModel().mLineStart != null){
             canvas.drawLine(controller.getModel().mLineStart.x, controller.getModel().mLineStart.y, controller.getModel().mLineEnd.x, controller.getModel().mLineEnd.y, controller.getModel().blackPaint);

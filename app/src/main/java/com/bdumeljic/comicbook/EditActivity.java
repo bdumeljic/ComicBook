@@ -18,8 +18,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import static com.bdumeljic.comicbook.R.color.blue;
-import static com.bdumeljic.comicbook.R.color.light_blue;
 
 public class EditActivity extends ActionBarActivity implements GestureOverlayView.OnGesturePerformedListener {
     static String TAG = "EditActivity";
@@ -37,6 +35,10 @@ public class EditActivity extends ActionBarActivity implements GestureOverlayVie
         super.onCreate(savedInstanceState);
         model = new DrawModel();
         view = new EditView(this);
+
+        setContentView(R.layout.activity_edit);
+        LinearLayout layout = (LinearLayout) findViewById(R.id.main);
+        layout.addView(view);
 
         mLibrary = GestureLibraries.fromRawResource(this, R.raw.gestures);
         if (!mLibrary.load()) {
