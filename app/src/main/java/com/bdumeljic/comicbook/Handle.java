@@ -1,4 +1,4 @@
-package com.bdumeljic.comicbook.Models;
+package com.bdumeljic.comicbook;
 
 import android.content.Context;
 import android.graphics.Bitmap;

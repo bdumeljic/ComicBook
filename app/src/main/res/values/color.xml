@@ -3,33 +3,19 @@
     <color name="primary">#607d8b</color>
     <color name="primary_dark">#455a64</color>
     <color name="primary_darkest">#263238</color>
-    <color name="accent">@color/pink</color>
-    <color name="accent_lighter">@color/pink_lighter</color>
-    <color name="pink_lighter">#F06292</color>
-    <color name="pink">#e91e63</color>
-    <color name="pink_alpha">#50e91e63</color>
-    <color name="cards">#78909c</color>
-    <color name="light_blue">#03a9f4</color>
-    <color name="blue">#5677fc</color>
-    <color name="cyan">#00bcd4</color>
-    <color name="teal">#009688</color>
-    <color name="deep_orange">#ff5722</color>
+    <color name="accent">@color/deep_orange</color>
+    <color name="accent_darker">@color/deep_orange_darker</color>
+
+    <color name="deep_orange">#EF6C00</color>
+    <color name="deep_orange_darker">#E65100</color>
 
     <color name="paper">#ECEFF1</color>
     <color name="nav_bar">#CFD8DC</color>
 
+    <color name="white">#fafafa</color>
+    <color name="white_pressed">#f1f1f1</color>
+    <color name="half_black">#808080</color>
+    <color name="black_semi_transparent">#B2000000</color>
 
-
-    <array name="project_card_colors">
-        <item>@color/primary</item>
-        <item>@color/primary_dark</item>
-        <item>@color/pink</item>
-        <item>@color/light_blue</item>
-        <item>@color/blue</item>
-        <item>@color/cyan</item>
-        <item>@color/teal</item>
-        <item>@color/deep_orange</item>
-
-    </array>
 
 </resources>

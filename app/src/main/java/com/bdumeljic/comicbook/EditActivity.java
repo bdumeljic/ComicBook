@@ -3,12 +3,7 @@ package com.bdumeljic.comicbook;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.LinearLayout;
-
-import static com.bdumeljic.comicbook.R.color.blue;
-import static com.bdumeljic.comicbook.R.color.light_blue;
 
 public class EditActivity extends ActionBarActivity {
     static String TAG = "EditActivity";
@@ -26,6 +21,8 @@ public class EditActivity extends ActionBarActivity {
         setContentView(R.layout.activity_edit);
         LinearLayout layout = (LinearLayout) findViewById(R.id.main);
         layout.addView(view);
+
+        
     }
 
     public DrawModel getModel() {

@@ -9,7 +9,7 @@ import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
-import static com.bdumeljic.comicbook.R.color.accent_lighter;
+import static com.bdumeljic.comicbook.R.color.accent;
 
 public class DrawModel {
     static String TAG = "DrawModel";
@@ -38,7 +38,7 @@ public class DrawModel {
         selectedPaint.setStrokeCap(Paint.Cap.ROUND);
         selectedPaint.setStrokeWidth(4f);
         selectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        selectedPaint.setColor(accent_lighter);
+        selectedPaint.setColor(accent);
         selectedPaint.setStrokeWidth(6f);
     }
 
