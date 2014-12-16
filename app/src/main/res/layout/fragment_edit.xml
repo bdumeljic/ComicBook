@@ -10,7 +10,6 @@
     <Button
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:background="@color/non_photo_blue"
         android:text="  "
         android:id="@+id/button_blue"
         android:layout_marginTop="20dp"
@@ -41,14 +40,14 @@
         android:layout_marginTop="20dp"
         android:layout_marginRight="20dp">
 
-        <com.bdumeljic.comicbook.EditSurfaceView
+        <com.bdumeljic.comicbook.EditView
             android:background="@android:color/white"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/surface"
-            tools:context="com.bdumeljic.comicbook.EditSurfaceView"
+            tools:context="com.bdumeljic.comicbook.EditView"
             android:longClickable="true"
-        class="com.bdumeljic.comicbook.EditSurfaceView"/>
+        class="com.bdumeljic.comicbook.EditView"/>
 
     </android.support.v7.widget.CardView>
 </RelativeLayout>

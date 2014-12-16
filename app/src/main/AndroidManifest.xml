@@ -1,43 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bdumeljic.comicbook" >
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <supports-screens
-        android:largeScreens="true"
-        android:normalScreens="false"
-        android:requiresSmallestWidthDp="600"
-        android:smallScreens="false"
-        android:xlargeScreens="true" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name="com.orm.SugarApp"
-        android:allowClearUserData="true" >
-        <meta-data android:name="DATABASE" android:value="example.db" />
-        <meta-data android:name="VERSION" android:value="1" />
-        <meta-data android:name="QUERY_LOG" android:value="true" />
+        android:theme="@style/AppTheme" >
+
         <activity
-            android:name="com.bdumeljic.comicbook.ProjectActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:name="EditActivity"
+            android:label="@string/quickdraw"
+            android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="com.bdumeljic.comicbook.EditActivity"
-            android:label="@string/title_activity_edit"
-            android:parentActivityName="com.bdumeljic.comicbook.ProjectActivity"
-            android:screenOrientation="landscape" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bdumeljic.comicbook.ProjectActivity" />
         </activity>
     </application>
 

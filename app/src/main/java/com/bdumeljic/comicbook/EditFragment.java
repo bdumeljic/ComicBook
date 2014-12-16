@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,7 @@ import android.widget.Button;
 
 
 /**
- * Fragment that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
+ * Fragment that holds the {@link com.bdumeljic.comicbook.EditView} that is used for drawing.
  * </p>
  * Use the {@link EditFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -22,42 +21,18 @@ public class EditFragment extends Fragment {
 
     public static final String TAG = "EditModeFragment";
 
-    public final static String PROJECT = "param_project";
-    public final static String VOLUME = "param_volume";
-
-    /** Project being edited */
-    private long mProjectId;
-    /** Volume being edited */
-    private long mVolumeId;
-
-    /** View that holds the {@link com.bdumeljic.comicbook.EditSurfaceView} */
+    /** View that holds the {@link com.bdumeljic.comicbook.EditView} */
     private View mDecorView;
 
     /** Surface used for drawing, this is one page in the comic book volume */
-    private EditSurfaceView mEditSurfaceView;
-    private EditSurfaceView.EditSurfaceThread mEditSurfaceThread;
+    private EditView mEditView;
+   // private EditSurfaceThread mEditSurfaceThread;
 
     /** Listener used to detect the undo and redo actions. */
     OnEdgeSwipeTouchListener onSwipeTouchListener;
 
-    public final int BLUE = 0;
-    public final int BLACK = 1;
-
-    /**
-     * Start a new EditFragment in which the page layout of a specified volume of a comic book can be edited.
-     *
-     * @param param1 Project ID
-     * @param param2 Volume ID
-     * @return A new instance of fragment EditFragment in which a volume of a comic book series can be edited.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static EditFragment newInstance(long param1, long param2) {
-        EditFragment fragment = new EditFragment();
-        Bundle args = new Bundle();
-        args.putLong(PROJECT, param1);
-        args.putLong(VOLUME, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static EditFragment newInstance() {
+        return new EditFragment();
     }
 
     public EditFragment() {
@@ -67,14 +42,7 @@ public class EditFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mProjectId = getArguments().getLong(PROJECT, -1);
-            mVolumeId = getArguments().getLong(VOLUME, -1);
-        }
 
-        if (mProjectId < 0 || mVolumeId < 0) {
-            getActivity().finish();
-        }
     }
 
     /**
@@ -109,46 +77,25 @@ public class EditFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
-        mEditSurfaceView = (EditSurfaceView) view.findViewById(R.id.surface);
-        mEditSurfaceThread = mEditSurfaceView.getThread();
+        mEditView = (EditView) view.findViewById(R.id.surface);
+      //  mEditSurfaceThread = mEditSurfaceView.getThread();
 
-        mEditSurfaceView.refreshDrawableState();
+        mEditView.refreshDrawableState();
 
         onSwipeTouchListener = new OnEdgeSwipeTouchListener() {
 
             @Override
             public void onSwipeLeft() {
-                mEditSurfaceView.onClickUndo();
             }
 
             @Override
             public void onSwipeRight() {
-                mEditSurfaceView.onClickRedo();
             }
         };
 
-        mEditSurfaceView.setFocusable(true);
+        mEditView.setFocusable(true);
         view.setOnTouchListener(onSwipeTouchListener);
 
-        Button blueButton = (Button) view.findViewById(R.id.button_blue);
-        Button blackButton = (Button) view.findViewById(R.id.button_black);
-
-        blueButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditSurfaceView.setDrawingMode(BLUE);
-            }
-        });
-
-        blackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditSurfaceView.setDrawingMode(BLACK);
-            }
-        });
-
-        /** Set the canvas to show the first page in the volume after the surface has been created. */
-        mEditSurfaceView.setToFirstPage(mProjectId, mVolumeId, 1);
 
         return view;
     }
@@ -169,59 +116,6 @@ public class EditFragment extends Fragment {
                     | View.SYSTEM_UI_FLAG_IMMERSIVE);
         }
 
-        mEditSurfaceView.refreshDrawableState();
-    }
-
-    /**
-     * Get the surface view that is being drawn on.
-     * @return {@link com.bdumeljic.comicbook.EditSurfaceView}
-     */
-    public EditSurfaceView getSurfaceView() {
-        return mEditSurfaceView;
-    }
-
-    /**
-     * Resume the drawing canvas when the fragment is resumed.
-     */
-    @Override
-    public void onResume() {
-        updatePages();
-        mEditSurfaceView.onResumeMySurfaceView();
-        super.onResume();
-    }
-
-    /**
-     * Pause the surface view on fragment pause.
-     */
-    @Override
-    public void onPause() {
-        mEditSurfaceView.onPauseMySurfaceView();
-        super.onPause();
-    }
-
-    /**
-     * Change the page that is currently being shown.
-     * @param num Page number
-     */
-    public void changePage(long num) {
-        mEditSurfaceView.changePage(num);
-    }
-
-    /**
-     * Add a page to the volume that is currently being edited.
-     */
-    public void addPage() {
-        mEditSurfaceView.addPage();
-        updatePages();
-    }
-
-    /**
-     * Updates the pages fragment in the panel.
-     */
-    public void updatePages(){
-        Fragment fragment = getActivity().getFragmentManager().findFragmentById(R.id.container_drawer);
-        if (fragment instanceof PagesFragment) {
-            ((PagesFragment) fragment).update();
-        }
+        mEditView.refreshDrawableState();
     }
 }

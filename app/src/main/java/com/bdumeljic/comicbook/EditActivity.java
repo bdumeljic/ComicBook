@@ -1,244 +1,71 @@
 package com.bdumeljic.comicbook;
 
-import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.LinearLayout;
 
-import com.bdumeljic.comicbook.Models.Project;
-import com.bdumeljic.comicbook.Models.Volume;
+import static com.bdumeljic.comicbook.R.color.blue;
+import static com.bdumeljic.comicbook.R.color.light_blue;
 
-import java.util.ArrayList;
+public class EditActivity extends ActionBarActivity {
+    static String TAG = "EditActivity";
 
-/**
- * Activity that controls the editing process. It holds all the sliding drawer fragments used in {@link com.bdumeljic.comicbook.NavigationDrawerFragment} as well as the {@link com.bdumeljic.comicbook.EditSurfaceView} that is used for drawing.
- */
-public class EditActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        PagesPresetsFragment.OnFragmentInteractionListener,
-        SettingsFragment.OnFragmentInteractionListener,
-        PagesFragment.OnFragmentInteractionListener {
+    EditView view;
+    DrawModel model;
+    EditSurfaceThread thread;
 
-
-/**
- * Fragment managing the selection of the current page, page layout preset selection and drawing settings.
- */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    String TAG = "EditActivity";
-
-    public final static String PROJECT = "param_project";
-    public final static String VOLUME = "param_volume";
-
-    public static final int PAGES = 0;
-    public static final int PRESETS = 1;
-    public static final int SETTINGS = 2;
-
-    public static final int BLUE = 0;
-    public static final int BLACK = 1;
-    public static final int CLEAR = 2;
-    public static final int SAVE = 3;
-
-
-    /** Fragment used for switching between volume pages. */
-    PagesFragment pages;
-    /** Fragment used for selecting page layout presets. */
-    PagesPresetsFragment presets;
-    /** Fragment used for drawing settings. */
-    SettingsFragment settings;
-
-    /** Project that is currently open and being edited. */
-    public long mProjectId = -1;
-    /** Volume that is currently open and being edited. */
-    public long mVolId = -1;
-
-    public Volume volume;
-
-    /**
-     * Open the project and volume. Set the pages of the sliding drawer {@link com.bdumeljic.comicbook.PagesFragment}.
-     * @param savedInstanceState
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        model = new DrawModel();
+        view = new EditView(this);
+
         setContentView(R.layout.activity_edit);
-
-        // Get the project and volume IDs that are being edited
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
-
-        if (extras != null)
-        {
-            mProjectId = extras.getLong(PROJECT, -1);
-            mVolId = extras.getLong(VOLUME, -1);
-        }
-
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, EditFragment.newInstance(mProjectId, mVolId))
-                    .commit();
-        }
-
-        Project p = Project.findById(Project.class, mProjectId);
-        Volume vol = Volume.findById(Volume.class, mVolId);
-
-        getSupportActionBar().setTitle("Editing " + p.getProjectName() + ", " + "Vol. " + String.valueOf(vol.getVolumeId() + 1) + " " + vol.getTitle());
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
-
-        pages = PagesFragment.newInstance(mProjectId, mVolId);
-        presets = new PagesPresetsFragment();
-        settings = new SettingsFragment();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        LinearLayout layout = (LinearLayout) findViewById(R.id.main);
+        layout.addView(view);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_edit, menu);
-        return true;
+    public DrawModel getModel() {
+        return model;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void onResume() {
+        super.onResume();
+        thread = new EditSurfaceThread();
+        thread.start();
+    }
 
-        if (id == R.id.action_settings) {
-            return true;
+    public void onPause() {
+        super.onPause();
+        thread.running = false;
+        try {
+            thread.join();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     /**
-     * Manage the fragment changes in the sliding drawer.
-     * @param position
+     * Thread used for managing the {@link com.bdumeljic.comicbook.EditView}.
      */
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the drawer content by replacing fragments
+    class EditSurfaceThread extends Thread {
+        /** Variable that keeps track if the surface thread is running or not. */
+        private boolean running = true;
 
-        Fragment fragment = null;
-
-        switch (position) {
-            case PAGES:
-                if(pages != null) {
-                    fragment = pages;
-                } else {
-                    fragment = PagesFragment.newInstance(mProjectId, mVolId);
+        @Override
+        public void run() {
+            while (running) {
+                try {
+                    view.postInvalidate();
+                    Thread.sleep(50);
+                } catch (Exception e) {
+                    System.out.println("EditSurfaceThread: " + e);
+                    e.printStackTrace();
                 }
-                break;
-            case PRESETS:
-                if(presets != null) {
-                    fragment = presets;
-                } else {
-                    fragment = new PagesPresetsFragment();
-                }
-                break;
-            case SETTINGS:
-                if(settings != null) {
-                    fragment = settings;
-                } else {
-                    fragment = new SettingsFragment();
-                }
-                break;
+            }
         }
-
-        if(fragment != null) {
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container_drawer, fragment)
-                    .commit();
-        }
-    }
-
-    /**
-     * Manage the interactions that happened in the {@link com.bdumeljic.comicbook.NavigationDrawerFragment}.
-     *
-     * @param type Setting that was changed
-     * @param bool
-     */
-    @Override
-    public void onFragmentInteraction(int type, Boolean bool) {
-        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-
-        switch (type) {
-            case BLUE:
-                editFragment.getSurfaceView().toggleVisibilityBlue(bool);
-                break;
-            case BLACK:
-                editFragment.getSurfaceView().toggleVisibilityBlack(bool);
-                break;
-            case CLEAR:
-                deletePageContentsDialog();
-                break;
-            //case SAVE:
-              //  editFragment.savePage();
-               // break;
-        }
-    }
-
-    /**
-     * On preset selected.
-     * @param position
-     */
-    public void onPresetSelected(int position) {
-        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-        editFragment.getSurfaceView().computePreset(position);
-    }
-
-    /**
-     * Called upon interaction with pages fragment.
-     * @param num
-     */
-    @Override
-    public void onFragmentInteraction(long num) {
-        //Log.e(TAG, "starting change page with num: " + num);
-        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-
-        if(num < 0) {
-            editFragment.addPage();
-        } else {
-            editFragment.changePage(num);
-        }
-    }
-
-    public void deletePageContentsDialog() {
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setMessage(R.id.delete_page_contents)
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        EditFragment editFragment = (EditFragment) getFragmentManager().findFragmentById(R.id.container);
-                        editFragment.getSurfaceView().deletePageContents();
-                    }
-                })
-                .create();
-
-        alertDialog.show();
-
     }
 }
