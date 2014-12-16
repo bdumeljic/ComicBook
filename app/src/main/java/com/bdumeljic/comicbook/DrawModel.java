@@ -1,11 +1,13 @@
 package com.bdumeljic.comicbook;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -14,16 +16,20 @@ import static com.bdumeljic.comicbook.R.color.accent;
 public class DrawModel {
     static String TAG = "DrawModel";
 
+    Context context;
+
     ArrayList<Path> blackPaths;
     Path currentPath;
 
-    static Paint blackPaint, selectedPaint;
+    Paint blackPaint, selectedPaint;
 
-    public DrawModel() {
-        currentPath = new Path();
-        blackPaths = new ArrayList<Path>();
+    public DrawModel(Context context) {
+        this.context = context;
 
-        blackPaint = new Paint();
+        this.currentPath = new Path();
+        this.blackPaths = new ArrayList<Path>();
+
+        this.blackPaint = new Paint();
         blackPaint.setAntiAlias(true);
         blackPaint.setStyle(Paint.Style.STROKE);
         blackPaint.setStrokeJoin(Paint.Join.ROUND);
@@ -31,7 +37,7 @@ public class DrawModel {
         blackPaint.setStrokeWidth(4f);
         blackPaint.setColor(Color.BLACK);
 
-        selectedPaint = new Paint();
+        this.selectedPaint = new Paint();
         selectedPaint.setAntiAlias(true);
         selectedPaint.setStyle(Paint.Style.STROKE);
         selectedPaint.setStrokeJoin(Paint.Join.ROUND);
@@ -104,5 +110,15 @@ public class DrawModel {
         blackPaths.add(currentPath);
 
         currentPath = new Path();
+    }
+
+    public void beautify() {
+    }
+
+    public void clear() {
+        currentPath = new Path();
+        blackPaths.clear();
+
+        Toast.makeText(context, "Cleared drawings", Toast.LENGTH_SHORT).show();
     }
 }

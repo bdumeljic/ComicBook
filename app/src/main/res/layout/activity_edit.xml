@@ -40,8 +40,8 @@
             fab:fab_colorPressed="@color/accent_darker"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/erase"
-            fab:fab_title="Erase"
+            android:id="@+id/clear"
+            fab:fab_title="Clear"
             fab:fab_icon="@drawable/delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

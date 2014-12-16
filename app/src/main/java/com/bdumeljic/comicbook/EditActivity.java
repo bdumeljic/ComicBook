@@ -3,7 +3,11 @@ package com.bdumeljic.comicbook;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 public class EditActivity extends ActionBarActivity {
     static String TAG = "EditActivity";
@@ -15,14 +19,32 @@ public class EditActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new DrawModel();
+        model = new DrawModel(this);
         view = new EditView(this);
 
         setContentView(R.layout.activity_edit);
         LinearLayout layout = (LinearLayout) findViewById(R.id.main);
         layout.addView(view);
 
-        
+        final FloatingActionButton actionBeautify = (FloatingActionButton) findViewById(R.id.beautify);
+        actionBeautify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "starting beautify");
+                model.beautify();
+                ((FloatingActionsMenu) findViewById(R.id.multiple_actions)).collapse();
+            }
+        });
+
+        final FloatingActionButton actionClear = (FloatingActionButton) findViewById(R.id.clear);
+        actionClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "starting clear");
+                model.clear();
+                ((FloatingActionsMenu) findViewById(R.id.multiple_actions)).collapse();
+            }
+        });
     }
 
     public DrawModel getModel() {
