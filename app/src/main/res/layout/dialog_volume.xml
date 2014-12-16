@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/add_new_volume_button"
+        android:text="@string/add_new_volume"
+
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/flat_button_height"
+
+        style="@style/flat_button"  />
+
+    <RelativeLayout
+        android:id="@+id/add_vol"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/add_new_volume"
+            android:text="@string/add_button"
+
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/flat_button_height"
+
+            style="@style/flat_button"  />
+        <EditText
+            android:id="@+id/new_vol_title"
+            android:inputType="text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/keyline_internal_padding"
+            android:layout_marginRight="@dimen/keyline_internal_padding"
+            android:layout_toLeftOf="@id/add_new_volume"
+            android:hint="@string/new_vol_name"
+            android:layout_alignParentStart="true" />
+
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>
