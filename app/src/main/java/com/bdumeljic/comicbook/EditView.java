@@ -37,7 +37,7 @@ public class EditView extends View {
     public void onDraw(Canvas canvas) {
         canvas.drawPath(controller.getModel().currentPath, controller.getModel().blackPaint);
         for (Path pathBlack : controller.getModel().blackPaths) {
-            //canvas.drawPath(pathBlack, controller.getModel().blackPaint);
+            canvas.drawPath(pathBlack, controller.getModel().blackPaint);
         }
 
         if(controller.getModel().mLineEnd != null && controller.getModel().mLineStart != null){

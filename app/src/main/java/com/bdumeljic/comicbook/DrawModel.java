@@ -17,6 +17,7 @@ public class DrawModel {
     static String TAG = "DrawModel";
 
     ArrayList<Path> blackPaths;
+    ArrayList<Point> pathPoints = new ArrayList<Point>();
     Path currentPath;
 
     static Paint blackPaint, selectedPaint;
@@ -57,13 +58,17 @@ public class DrawModel {
 
         switch(action) {
             case MotionEvent.ACTION_DOWN:
+                pathPoints.add(new Point((int)x,(int)y));
                 touch_start(x, y);
                 break;
             case MotionEvent.ACTION_MOVE:
+                pathPoints.add(new Point((int)x,(int)y));
                 touch_move(x, y);
                 break;
             case MotionEvent.ACTION_UP:
+                pathPoints.add(new Point((int)x,(int)y));
                 touch_up();
+                simplifyPath();
                 break;
         }
 
@@ -120,5 +125,11 @@ public class DrawModel {
         mCircleCenter = new Point ((int)bounds.centerX(), (int)bounds.centerY());
 
         mCircleRadius = bounds.height() > bounds.width() ? bounds.width()/2 : bounds.height()/2;
+    }
+
+    public void simplifyPath(){
+        Log.d(TAG, "Pathpoints before : " + pathPoints.size());
+        pathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(pathPoints, 80);
+        Log.d(TAG, "Pathpoints after : " + pathPoints.size());
     }
 }
