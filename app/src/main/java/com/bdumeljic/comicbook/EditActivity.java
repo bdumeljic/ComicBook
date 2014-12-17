@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 
 public class EditActivity extends ActionBarActivity implements GestureOverlayView.OnGesturePerformedListener {
@@ -33,7 +35,7 @@ public class EditActivity extends ActionBarActivity implements GestureOverlayVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new DrawModel();
+        model = new DrawModel(this);
         view = new EditView(this);
 
         setContentView(R.layout.activity_edit);
@@ -49,6 +51,26 @@ public class EditActivity extends ActionBarActivity implements GestureOverlayVie
 
         GestureOverlayView gestures = (GestureOverlayView) findViewById(R.id.gestures);
         gestures.addOnGesturePerformedListener(this);
+
+        final FloatingActionButton actionBeautify = (FloatingActionButton) findViewById(R.id.beautify);
+        actionBeautify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "starting beautify");
+                model.beautify();
+                ((FloatingActionsMenu) findViewById(R.id.multiple_actions)).collapse();
+            }
+        });
+
+        final FloatingActionButton actionClear = (FloatingActionButton) findViewById(R.id.clear);
+        actionClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "starting clear");
+                model.clear();
+                ((FloatingActionsMenu) findViewById(R.id.multiple_actions)).collapse();
+            }
+        });
     }
 
     public DrawModel getModel() {
