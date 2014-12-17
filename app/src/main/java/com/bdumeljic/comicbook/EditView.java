@@ -36,18 +36,19 @@ public class EditView extends View {
 
     public void onDraw(Canvas canvas) {
         canvas.drawPath(controller.getModel().currentPath, controller.getModel().blackPaint);
+
         for (Path pathBlack : controller.getModel().blackPaths) {
             canvas.drawPath(pathBlack, controller.getModel().blackPaint);
         }
 
-        if(controller.getModel().mLineEnd != null && controller.getModel().mLineStart != null){
-            canvas.drawLine(controller.getModel().mLineStart.x, controller.getModel().mLineStart.y, controller.getModel().mLineEnd.x, controller.getModel().mLineEnd.y, controller.getModel().blackPaint);
-            controller.getModel().mLineEnd = null;
-            controller.getModel().mLineStart = null;
-        }
+        if(controller.getModel().isBeautified) {
+            for (Line line : controller.getModel().beaLines) {
+                line.draw(canvas);
+            }
 
-        if(controller.getModel().mCircleCenter != null && controller.getModel().mCircleRadius != -1){
-           canvas.drawCircle(controller.getModel().mCircleCenter.x, controller.getModel().mCircleCenter.y, controller.getModel().mCircleRadius, controller.getModel().blackPaint);
+            for (Circle circle : controller.getModel().beaCircles) {
+                circle.draw(canvas);
+            }
         }
 
     }
