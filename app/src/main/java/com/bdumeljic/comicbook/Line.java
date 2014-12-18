@@ -10,10 +10,12 @@ public class Line {
 
     Point start;
     Point end;
+    Paint paint;
 
-    public Line(Point start, Point end) {
+    public Line(Point start, Point end, Paint paint) {
         this.start = start;
         this.end = end;
+        this.paint = paint;
     }
 
     public Point getStartPoint(){

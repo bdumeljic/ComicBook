@@ -153,7 +153,7 @@ public class DrawModel {
         blackPaths.add(currentPath);
         mLineEnd = new Point((int)mX, (int)mY);
 
-        preBeaLines.add(new Line(mLineStart, mLineEnd, blackPaint));
+       // preBeaLines.add(new Line(mLineStart, mLineEnd, blackPaint));
 
         mLineStart = null;
         mLineEnd = null;
@@ -247,6 +247,10 @@ public class DrawModel {
             //lineSegments.add(new Line(lastTurn, simplifiedPath.get(simplifiedPath.size()-1)));
             newPathPoints.add(simplifiedPath.get(simplifiedPath.size()-1));
             newPathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(newPathPoints, 30);
+            //create lines out of new point array
+            for(int i = 0; i < newPathPoints.size() - 1; i++){
+                preBeaLines.add(new Line(newPathPoints.get(i), newPathPoints.get(i+1), blackPaint));
+            }
 
 
         }
