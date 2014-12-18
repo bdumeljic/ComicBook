@@ -21,8 +21,14 @@ public class DrawModel {
 
     Context context;
 
+    ArrayList<Line> preBeaLines;
+    ArrayList<Circle> preBeaCircles;
+
+    ArrayList<Line> beaLines;
+    ArrayList<Circle> beaCircles;
+
     ArrayList<Path> blackPaths;
-    ArrayList<Point> pathPoints = new ArrayList<Point>();
+    ArrayList<Point> pathPoints;
     Path currentPath;
 
     ArrayList<Line> lineSegments = new ArrayList<>();
@@ -36,11 +42,20 @@ public class DrawModel {
     public Point mCircleCenter;
     public float mCircleRadius = -1;
 
+    boolean isBeautified = false;
+
     public DrawModel(Context context) {
         this.context = context;
 
         this.currentPath = new Path();
         this.blackPaths = new ArrayList<Path>();
+
+        this.preBeaLines = new ArrayList<Line>();
+        this.preBeaCircles = new ArrayList<Circle>();
+        this.beaLines = new ArrayList<Line>();
+        this.beaCircles = new ArrayList<Circle>();
+
+        this.pathPoints = new ArrayList<Point>();
 
         this.blackPaint = new Paint();
         blackPaint.setAntiAlias(true);
@@ -138,16 +153,42 @@ public class DrawModel {
         blackPaths.add(currentPath);
         mLineEnd = new Point((int)mX, (int)mY);
 
+        preBeaLines.add(new Line(mLineStart, mLineEnd, blackPaint));
+
+        mLineStart = null;
+        mLineEnd = null;
         currentPath = new Path();
     }
 
     public void computeCircle(RectF bounds){
-        mCircleCenter = new Point ((int)bounds.centerX(), (int)bounds.centerY());
-
+        mCircleCenter = new Point ((int) bounds.centerX(), (int) bounds.centerY());
         mCircleRadius = bounds.height() > bounds.width() ? bounds.width()/2 : bounds.height()/2;
+
+        preBeaCircles.add(new Circle(mCircleCenter, mCircleRadius, blackPaint));
+
+        preBeaLines.remove(preBeaLines.size() - 1);
+
+        mCircleCenter = null;
+        mCircleRadius = -1;
     }
 
+    public void simplifyPath() {
+        Log.d(TAG, "Pathpoints before : " + pathPoints.size());
+        pathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(pathPoints, 80);
+        Log.d(TAG, "Pathpoints after : " + pathPoints.size());
+    }
     public void beautify() {
+        currentPath = new Path();
+        blackPaths.clear();
+        pathPoints.clear();
+
+        beaLines.addAll(preBeaLines);
+        beaCircles.addAll(preBeaCircles);
+
+        preBeaLines.clear();
+        preBeaCircles.clear();
+
+        isBeautified = true;
     }
 
     public void clear() {
@@ -158,6 +199,20 @@ public class DrawModel {
         mLineStart = null;
         mCircleCenter = null;
         mCircleRadius = -1;
+        pathPoints.clear();
+
+        beaLines.clear();
+        beaCircles.clear();
+        preBeaLines.clear();
+        preBeaCircles.clear();
+
+        mLineEnd = null;
+        mLineStart = null;
+
+        mCircleCenter = null;
+        mCircleRadius = -1;
+
+        isBeautified = false;
 
         Toast.makeText(context, "Cleared drawings", Toast.LENGTH_SHORT).show();
     }

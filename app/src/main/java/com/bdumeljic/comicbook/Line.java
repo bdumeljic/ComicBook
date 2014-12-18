@@ -2,6 +2,8 @@ package com.bdumeljic.comicbook;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
 
 public class Line {
@@ -28,5 +30,9 @@ public class Line {
 
     public void setEndPoint(Point end){
         this.end = end;
+    }
+
+    public void draw(Canvas c) {
+        c.drawLine(start.x, start.y, end.x, end.y, paint);
     }
 }
