@@ -233,44 +233,84 @@ public class DrawModel {
                 }
                 if (directionVectors.size() > 1) {
                     double angle = dot(directionVectors.get(directionVectors.size() - 2), directionVectors.get(directionVectors.size() - 1));
-                    Log.d(TAG, "Angle: " + angle);
                     if (Math.abs(angle) < 160) {
-                        //add as new line as turning point detected, line defined by last turning point and new detected turning point
-                        /*Line line = new Line(lastTurn, simplifiedPath.get(i));
-                        lineSegments.add(line);*/
                         newPathPoints.add(lastTurn);
                         newPathPoints.add(simplifiedPath.get(i));
                         lastTurn = simplifiedPath.get(i);
                     }
                 }
             }
-            //lineSegments.add(new Line(lastTurn, simplifiedPath.get(simplifiedPath.size()-1)));
             newPathPoints.add(simplifiedPath.get(simplifiedPath.size()-1));
-            newPathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(newPathPoints, 30);
+            newPathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(newPathPoints, 40);
             //create lines out of new point array
             for(int i = 0; i < newPathPoints.size() - 1; i++){
                 preBeaLines.add(new Line(newPathPoints.get(i), newPathPoints.get(i+1), blackPaint));
             }
+            for(int i = 0; i < preBeaLines.size() - 1; i++) {
+                //check for intersection and 90 degrees
+                Point intersection = intersectLines(preBeaLines.get(i), preBeaLines.get(i+1));
+                if(intersection != null){
+                    Log.d(TAG, "IntersectionPoint: " + intersection);
+                    //set the point closest to the intersection point to intersection point values
 
+                    for(int j = 0; j<2; j++){
+                    double distStartPt = distanceBetweenPoints(intersection, preBeaLines.get(i+j).getStartPoint());
+                    double distEndPt = distanceBetweenPoints(intersection, preBeaLines.get(i+j).getEndPoint());
+
+                        if(distStartPt < distEndPt){
+                            preBeaLines.get(i+j).setStartPoint(intersection);
+                        }else {
+                            preBeaLines.get(i+j).setEndPoint(intersection);
+                        }
+                    }
+
+
+                    /*double diffAngle = Math.abs(angleBetween2Lines(preBeaLines.get(i), preBeaLines.get(i+1)) - 90);
+                    if(diffAngle < 5){
+                        double angle = Math.toRadians(diffAngle);
+                        Point oldEndPoint = preBeaLines.get(i+1).getEndPoint();
+                        preBeaLines.get(i+1).setEndPoint(new Point((int)(oldEndPoint.x + 30 * Math.cos(angle)),(int) (oldEndPoint.y + 30 * Math.sin(angle))));
+                        Log.d(TAG, "Set new EndPoint");
+                    }*/
+
+                }
+            }
 
         }
 
     }
 
-    public double computeAngle(Point start, Point end){
-        Log.d(TAG, "Vectors: " + start + " , " + end);
-        return Math.toDegrees(Math.atan2(start.y - end.y, start.x - end.x));
+    public double distanceBetweenPoints(Point p1, Point p2){
+        return Math.sqrt((p2.x -p1.x) * (p2.x -p1.x)) + ((p2.y -p1.y) * (p2.y -p1.y));
     }
 
-    public double computeGradient(Point vector1, Point vector2){
-        if(vector2.x - vector1.x == 0){
-            return 0;
-        }
-        return (vector2.y - vector1.y) / (vector2.x - vector1.x);
+    public Point computeVectorOfLine(Line line){
+        return new Point(line.getEndPoint().x - line.getStartPoint().x, line.getEndPoint().y - line.getStartPoint().y);
     }
 
     public double LengthOfLine(Line line){
         return Math.sqrt((line.getEndPoint().x- line.getStartPoint().x)*(line.getEndPoint().x- line.getStartPoint().x) + (line.getEndPoint().y- line.getStartPoint().y)*(line.getEndPoint().y - line.getStartPoint().y));
+    }
+
+
+    public double angleBetween2Lines(Line line1, Line line2)
+    {
+        return computeAngle(computeVectorOfLine(line1), computeVectorOfLine(line2));
+    }
+
+    public double computeAngle(Point vector1, Point vector2){
+        double dot = dot(vector1, vector2);
+        double lengths = LengthOfVector(vector1) * LengthOfVector(vector2);
+        return Math.acos(dot/lengths)* 180/Math.PI;
+
+    }
+
+    public double LengthOfVector(Point vector){
+        return  Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+    }
+
+    public double slopeOfLine(Line line){
+        return (line.getEndPoint().y - line.getStartPoint().y) / (line.getEndPoint().x - line.getStartPoint().x);
     }
     /**
      * Compute the dot product of two vectors
@@ -284,5 +324,39 @@ public class DrawModel {
         res += v1.y * v2.y;
 
         return res;
+    }
+
+    public Point intersectLines(Line line1,Line line2){
+        double x1 = line1.getStartPoint().x;
+        double x2 = line1.getEndPoint().x;
+        double x3 = line2.getStartPoint().x;
+        double x4 = line2.getEndPoint().x;
+        double y1 = line1.getStartPoint().y;
+        double y2 = line1.getEndPoint().y;
+        double y3 = line2.getStartPoint().y;
+        double y4 = line2.getEndPoint().y;
+
+
+        double zx = (x1 * y2 - y1 * x2)*(x3-x4) - (x1 - x2) * (x3 * y4 - y3 * x4);
+        double zy = (x1 * y2 - y1 * x2)*(y3-y4) - (y1 - y2) * (x3 * y4 - y3 * x4);
+
+
+        double n = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+        // Coordinates of Intersection
+        double x = zx/n;
+        double y = zy/n;
+
+        // division by zero ??
+        if (Double.isNaN(x)& Double.isNaN(y))
+        {
+            return null;
+        }
+        // Intersection point on line segment?
+        if ((x - x1) / (x2 - x1) > 1 || (x - x3) / (x4 - x3) > 1 || (y - y1) / (y2 - y1) > 1 || (y - y3) / (y4 - y3) > 1 )
+        {
+            return null;
+        }
+        return new Point((int) x,(int) y);
     }
 }
