@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -47,7 +48,18 @@ public class EditView extends View {
         }
 
         if(controller.getModel().mCircleCenter != null && controller.getModel().mCircleRadius != -1){
-           canvas.drawCircle(controller.getModel().mCircleCenter.x, controller.getModel().mCircleCenter.y, controller.getModel().mCircleRadius, controller.getModel().blackPaint);
+            canvas.drawCircle(controller.getModel().mCircleCenter.x, controller.getModel().mCircleCenter.y, controller.getModel().mCircleRadius, controller.getModel().blackPaint);
+        }
+        /*for(Line line : controller.getModel().lineSegments ){
+            canvas.drawLine(line.getStartPoint().x, line.getStartPoint().y, line.getEndPoint().x, line.getEndPoint().y, controller.getModel().lineSegmentPaint);
+            canvas.drawCircle(line.getStartPoint().x, line.getStartPoint().y, 10, controller.getModel().lineSegmentPaint);
+            canvas.drawCircle(line.getEndPoint().x, line.getEndPoint().y, 10, controller.getModel().lineSegmentPaint);
+        }*/
+
+        for(int i = 0; i < controller.getModel().newPathPoints.size() - 1; i++){
+            canvas.drawLine(controller.getModel().newPathPoints.get(i).x, controller.getModel().newPathPoints.get(i).y, controller.getModel().newPathPoints.get(i+1).x, controller.getModel().newPathPoints.get(i+1).y, controller.getModel().lineSegmentPaint);
+            canvas.drawCircle(controller.getModel().newPathPoints.get(i).x, controller.getModel().newPathPoints.get(i).y, 10, controller.getModel().lineSegmentPaint);
+            //canvas.drawCircle(line.getEndPoint().x, line.getEndPoint().y, 10, controller.getModel().lineSegmentPaint);
         }
 
     }
