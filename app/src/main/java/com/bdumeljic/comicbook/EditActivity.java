@@ -121,6 +121,11 @@ public class EditActivity extends ActionBarActivity implements GestureOverlayVie
         }
     };
 
+    /**
+     * Also pass touch events on to the gesture detector to make sure that
+     * @param e
+     * @return
+     */
     @Override
     public boolean dispatchTouchEvent(MotionEvent e)
     {
@@ -128,6 +133,11 @@ public class EditActivity extends ActionBarActivity implements GestureOverlayVie
         return super.dispatchTouchEvent(e);
     }
 
+    /**
+     * Check if a circle has been drawn using the gesture detector.
+     * @param overlay
+     * @param gesture
+     */
      public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
         ArrayList<Prediction> predictions = mLibrary.recognize(gesture);
 
@@ -138,8 +148,6 @@ public class EditActivity extends ActionBarActivity implements GestureOverlayVie
                 CircleBounds = gesture.getBoundingBox();
                 model.computeCircle(CircleBounds);
                 Toast.makeText(this, "Circle drawn", Toast.LENGTH_SHORT).show();
-            } else if ("triangle".equalsIgnoreCase(result)) {
-                Toast.makeText(this, "Rect drawn", Toast.LENGTH_SHORT).show();
             }
         }
     }

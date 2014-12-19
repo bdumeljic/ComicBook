@@ -1,14 +1,10 @@
 package com.bdumeljic.comicbook;
 
-import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.util.Log;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Line {
@@ -18,8 +14,7 @@ public class Line {
     Paint paint;
     double length;
 
-    float TOLERANCE = 75;
-    float THRESHOLD = 100;
+    float TOLERANCE = 56;
 
     public Line(Point start, Point end, Paint paint) {
         this.start = start;
@@ -27,19 +22,10 @@ public class Line {
         this.paint = paint;
 
         this.length = dist(start, end);
-        Log.d("LINE", "made line with length: " + String.valueOf(length));
-    }
-
-    public void update(int point, Point newPoint) {
-        Log.d("LINE", "updated line " + point + " to " + newPoint.toString());
-        if (point == 0) this.start = newPoint;
-        else this.end = newPoint;
     }
 
     public double dist(Point one, Point two) {
-        double result = Math.sqrt((Math.abs(one.x - two.x) * Math.abs(one.x - two.x)) + (Math.abs(one.y - two.y) * Math.abs(one.y - two.y)));
-        Log.d("LINE" , String.valueOf(result));
-        return result;
+        return Math.sqrt((Math.abs(one.x - two.x) * Math.abs(one.x - two.x)) + (Math.abs(one.y - two.y) * Math.abs(one.y - two.y)));
     }
 
     public Point getStartPoint(){
@@ -58,10 +44,26 @@ public class Line {
         this.end = end;
     }
 
+    /**
+     * Update the line with the new point provided.
+     * @param point     Which point should be changed; 0 = start and 1 = end.
+     * @param newPoint  The new point
+     */
+    public void update(int point, Point newPoint) {
+        if (point == 0) this.start = newPoint;
+        else this.end = newPoint;
+    }
+
+    /**
+     * Determine the shortest distance between two lines. This line and line that was passed along as an argument.
+     * @param otherLine
+     * @return
+     */
     public Map<String, Object> compare(Line otherLine) {
-        //if (this.length < THRESHOLD || otherLine.length < THRESHOLD) {
-          //  return null;
-        //}
+        // Check if the line is long enough
+        if (this.length < TOLERANCE || otherLine.length < TOLERANCE) {
+          return null;
+        }
 
         double minDist = 10000;
         int p1 = -1;
@@ -95,12 +97,12 @@ public class Line {
             p2 = 1;
         }
 
-        if(minDist < TOLERANCE) {
+        if(minDist < TOLERANCE && minDist > 0.0) {
             Map<String, Object> result = new HashMap();
             result.put("minDist", minDist);
             result.put("p1", p1);
             result.put("p2", p2);
-            Log.d("LINE", "found: "  + result.toString());
+            //Log.d("LINE", "found: "  + result.toString());
             return result;
         }
 
