@@ -224,6 +224,7 @@ public class DrawModel {
         lastTurn = simplifiedPath.get(0);
         ArrayList<Point> directionVectors = new ArrayList<Point>();
 
+        //simplification of path
         if (simplifiedPath.size() > 1) {
             for(int i = 0; i < simplifiedPath.size() - 1; i = i + pointStep) {
                 if(i+pointStep < simplifiedPath.size()) {
@@ -241,21 +242,20 @@ public class DrawModel {
                 }
             }
             newPathPoints.add(simplifiedPath.get(simplifiedPath.size()-1));
-            newPathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(newPathPoints, 40);
+            newPathPoints = Douglas_Peucker_Algorithm.reduceWithTolerance(newPathPoints, 70);
             //create lines out of new point array
             for(int i = 0; i < newPathPoints.size() - 1; i++){
                 preBeaLines.add(new Line(newPathPoints.get(i), newPathPoints.get(i+1), blackPaint));
             }
+            //apply constraints to new pre breautified lines
             for(int i = 0; i < preBeaLines.size() - 1; i++) {
                 //check for intersection and 90 degrees
                 Point intersection = intersectLines(preBeaLines.get(i), preBeaLines.get(i+1));
                 if(intersection != null){
-                    Log.d(TAG, "IntersectionPoint: " + intersection);
-                    //set the point closest to the intersection point to intersection point values
-
+                    //cut of overreaching ends from intersecting lines
                     for(int j = 0; j<2; j++){
-                    double distStartPt = distanceBetweenPoints(intersection, preBeaLines.get(i+j).getStartPoint());
-                    double distEndPt = distanceBetweenPoints(intersection, preBeaLines.get(i+j).getEndPoint());
+                        double distStartPt = distanceBetweenPoints(intersection, preBeaLines.get(i+j).getStartPoint());
+                        double distEndPt = distanceBetweenPoints(intersection, preBeaLines.get(i+j).getEndPoint());
 
                         if(distStartPt < distEndPt){
                             preBeaLines.get(i+j).setStartPoint(intersection);
@@ -264,20 +264,37 @@ public class DrawModel {
                         }
                     }
 
-
-                    /*double diffAngle = Math.abs(angleBetween2Lines(preBeaLines.get(i), preBeaLines.get(i+1)) - 90);
-                    if(diffAngle < 5){
+                    //set the point furthest away from the intersection point to the new value so the line is perpendicular
+                    double diffAngle = angleBetween2Lines(preBeaLines.get(i), preBeaLines.get(i+1)) - 90;
+                    if(Math.abs(diffAngle) < 10){
+                        //compute distance of start and end point of line to intersection point
+                        double distStartPt = distanceBetweenPoints(intersection, preBeaLines.get(i+1).getStartPoint());
+                        double distEndPt = distanceBetweenPoints(intersection, preBeaLines.get(i+1).getEndPoint());
                         double angle = Math.toRadians(diffAngle);
-                        Point oldEndPoint = preBeaLines.get(i+1).getEndPoint();
-                        preBeaLines.get(i+1).setEndPoint(new Point((int)(oldEndPoint.x + 30 * Math.cos(angle)),(int) (oldEndPoint.y + 30 * Math.sin(angle))));
-                        Log.d(TAG, "Set new EndPoint");
-                    }*/
+                        //compute vector of first line intersection point is on to know shift direction
+                        Point vectorLine = computeVectorOfLine(preBeaLines.get(i));
+                        double normalizedVectorX = vectorLine.x/LengthOfVector(vectorLine);
+                        double normalizedVectorY = vectorLine.y/LengthOfVector(vectorLine);
+
+                        if(distStartPt < distEndPt){
+                            preBeaLines.get(i+1).setEndPoint(new Point((int)(preBeaLines.get(i+1).getEndPoint().x + shiftValue(preBeaLines.get(i+1), angle) * normalizedVectorX),(int)(preBeaLines.get(i+1).getEndPoint().y + shiftValue(preBeaLines.get(i+1), angle ) * normalizedVectorY)));
+                        }else {
+                            preBeaLines.get(i+1).setStartPoint(new Point((int)(preBeaLines.get(i+1).getStartPoint().x + shiftValue(preBeaLines.get(i+1), angle) * normalizedVectorX),(int)(preBeaLines.get(i+1).getStartPoint().y + shiftValue(preBeaLines.get(i+1), angle ) * normalizedVectorY)));
+                        }
+                        Log.d(TAG, "new Point set to 90 degrees");
+                        Log.d(TAG, "ShiftValue: "+ shiftValue(preBeaLines.get(i+1), angle));
+                        Log.d(TAG, "Vector pit of Line: "+ vectorLine);
+                        Log.d(TAG, "Normalized vector: "+ normalizedVectorX + " , " + normalizedVectorY);
+                    }
 
                 }
             }
 
         }
 
+    }
+    public double shiftValue(Line line, double angle){
+        return LengthOfLine(line) * Math.sin(angle);
     }
 
     public double distanceBetweenPoints(Point p1, Point p2){

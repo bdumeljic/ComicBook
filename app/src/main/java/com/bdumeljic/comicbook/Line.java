@@ -19,7 +19,7 @@ public class Line {
     }
 
     public Point getStartPoint(){
-        return start;
+        return this.start;
     }
 
     public void setStartPoint(Point start){
@@ -27,7 +27,7 @@ public class Line {
     }
 
     public Point getEndPoint(){
-        return end;
+        return this.end;
     }
 
     public void setEndPoint(Point end){
