@@ -1,7 +1,6 @@
 package com.bdumeljic.comicbook;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -13,6 +12,7 @@ import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static com.bdumeljic.comicbook.R.color.accent;
 
@@ -188,7 +188,32 @@ public class DrawModel {
         preBeaLines.clear();
         preBeaCircles.clear();
 
+        checkConnectingLines();
+
         isBeautified = true;
+    }
+
+    public void checkConnectingLines() {
+        Line currentLine;
+
+        for(int i = 0; i < beaLines.size(); i++) {
+            currentLine = beaLines.get(i);
+            for(int j = i + 1; j < beaLines.size(); j++) {
+                Line lineToCompare = beaLines.get(j);
+                Map list = currentLine.compare(lineToCompare);
+                if (list == null) Log.d(TAG, "found NO lines to connect");
+                else {
+                    Log.d(TAG, "found a line to connect");
+                    Point currentPoint;
+
+                    if(list.get("p1") == 0) currentPoint = currentLine.start;
+                    else currentPoint = currentLine.end;
+
+                    if (list.get("p2") == 0) lineToCompare.update(0, currentPoint);
+                    else lineToCompare.update(1, currentPoint);
+                }
+            }
+        }
     }
 
     public void clear() {
